@@ -4,7 +4,7 @@ import { useState } from 'react';
 import styles from './page.module.css';
 
 // Mock Data (will be replaced with real API data)
-const mockBookedEvent = null; // Change to an object to see the booked state
+const mockBookedEvent: { eventName: string; date: string; time: string; locationAddress: string } | null = null;
 
 const mockFeaturedEvent = {
   id: '1',
