@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background-color: var(--background);
+  background-color: transparent; /* Allow global background to show */
   color: #fff;
   font-family: var(--font-inter), sans-serif;
 }
@@ -11,9 +11,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   position: sticky;
   top: 0;
   z-index: 50;

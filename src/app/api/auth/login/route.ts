@@ -35,12 +35,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Contact number must be exactly 10 digits' }, { status: 400 });
       }
 
-      // Upsert user (Login / Register combined)
-      const user = await User.findOneAndUpdate(
-        { contactNumber },
-        { name, contactNumber, role: 'user' },
-        { upsert: true, new: true }
-      );
+      let user = await User.findOne({ contactNumber });
+      
+      if (!user) {
+        // User doesn't exist, store them in DB
+        user = await User.create({ name, contactNumber, role: 'user' });
+      }
+      // If user exists, there is no need to store/update them in DB, just log them in.
       
       userId = user._id.toString();
     }
