@@ -1,38 +1,63 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<'login' | 'signup' | 'admin'>('signup');
+  const router = useRouter();
+  const [mode, setMode] = useState<'login' | 'admin'>('login');
   const [name, setName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Basic frontend validation
     if (!/^\d{10}$/.test(contactNumber)) {
       setError('Contact number must be exactly 10 digits.');
       return;
     }
 
-    if (mode === 'signup' && !name.trim()) {
-      setError('Name is required for sign up.');
+    if (mode === 'login' && !name.trim()) {
+      setError('Name is required to log in.');
       return;
     }
 
-    if (mode === 'admin' && password !== 'JESUSLOVESYOU') {
-      setError('Invalid admin credentials.');
+    if (mode === 'admin' && !password.trim()) {
+      setError('Admin password is required.');
       return;
     }
 
-    // TODO: Connect to backend API
-    console.log('Submitting:', { mode, name, contactNumber, password });
-    alert('Authentication API integration is in progress!');
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, name, contactNumber, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      // Success
+      if (data.role === 'admin') {
+        router.push('/admin'); // Assuming admin has a separate dashboard
+      } else {
+        router.push('/home');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,20 +70,16 @@ export default function LoginPage() {
         </div>
         <h1 className={styles.leftTitle}>Get Started with Us</h1>
         <p className={styles.leftDesc}>
-          Complete these easy steps to register your account and join our community.
+          Access our church community portal to register for upcoming events.
         </p>
 
         <div className={styles.steps}>
-          <div className={`${styles.stepCard} ${mode === 'signup' ? styles.active : ''}`}>
-            <div className={styles.stepNumber}>1</div>
-            <span className={styles.stepText}>Sign up your account</span>
-          </div>
           <div className={`${styles.stepCard} ${mode === 'login' ? styles.active : ''}`}>
-            <div className={styles.stepNumber}>2</div>
+            <div className={styles.stepNumber}>1</div>
             <span className={styles.stepText}>Log in securely</span>
           </div>
           <div className={`${styles.stepCard} ${mode === 'admin' ? styles.active : ''}`}>
-            <div className={styles.stepNumber}>3</div>
+            <div className={styles.stepNumber}>2</div>
             <span className={styles.stepText}>Admin Access</span>
           </div>
         </div>
@@ -68,20 +89,18 @@ export default function LoginPage() {
       <div className={styles.rightPanel}>
         <div className={styles.formContainer}>
           <h2 className={styles.formTitle}>
-            {mode === 'signup' && 'Sign Up Account'}
-            {mode === 'login' && 'Welcome Back'}
+            {mode === 'login' && 'Welcome to DA-ROS'}
             {mode === 'admin' && 'Admin Portal'}
           </h2>
           <p className={styles.formSubtitle}>
-            {mode === 'signup' && 'Enter your personal data to create your account.'}
-            {mode === 'login' && 'Enter your contact number to log in.'}
+            {mode === 'login' && 'Enter your details to log in to your account.'}
             {mode === 'admin' && 'Enter admin credentials.'}
           </p>
 
           {error && <div className={styles.errorMsg}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            {mode === 'signup' && (
+            {mode === 'login' && (
               <div className={styles.formGroup}>
                 <label className={styles.label}>Full Name</label>
                 <input
@@ -122,30 +141,10 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button type="submit" className={styles.submitBtn}>
-              {mode === 'signup' && 'Sign Up'}
-              {mode === 'login' && 'Log In'}
-              {mode === 'admin' && 'Access Portal'}
+            <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+              {isLoading ? 'Processing...' : (mode === 'login' ? 'Log In' : 'Access Portal')}
             </button>
           </form>
-
-          {mode === 'signup' && (
-            <p className={styles.toggleText}>
-              Already have an account?{' '}
-              <span className={styles.toggleLink} onClick={() => setMode('login')}>
-                Log in
-              </span>
-            </p>
-          )}
-
-          {mode === 'login' && (
-            <p className={styles.toggleText}>
-              Don't have an account?{' '}
-              <span className={styles.toggleLink} onClick={() => setMode('signup')}>
-                Sign up
-              </span>
-            </p>
-          )}
 
           {mode !== 'admin' && (
             <div className={styles.adminToggle} onClick={() => setMode('admin')}>
