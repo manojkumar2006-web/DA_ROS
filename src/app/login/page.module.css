@@ -1,0 +1,240 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  font-family: var(--font-inter), sans-serif;
+}
+
+/* Left Panel */
+.leftPanel {
+  flex: 0.45;
+  background: radial-gradient(circle at top center, var(--crimson) 0%, #1a0005 80%, #000 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+  position: relative;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.logoIcon {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+}
+
+.logoText {
+  font-family: var(--font-playfair), serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.leftTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.leftDesc {
+  color: #ccc;
+  font-size: 1rem;
+  max-width: 300px;
+  line-height: 1.5;
+  margin-bottom: 3rem;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.stepCard {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #888;
+  transition: all 0.3s ease;
+}
+
+.stepCard.active {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+.stepNumber {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #333;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stepCard.active .stepNumber {
+  background: #000;
+}
+
+.stepText {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Right Panel */
+.rightPanel {
+  flex: 0.55;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 400px;
+}
+
+.formTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.formSubtitle {
+  color: #888;
+  font-size: 0.95rem;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.input {
+  background: #111;
+  border: 1px solid #333;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--crimson);
+  box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.2);
+}
+
+.input::placeholder {
+  color: #666;
+}
+
+.submitBtn {
+  width: 100%;
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.submitBtn:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.toggleText {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.toggleLink {
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.toggleLink:hover {
+  color: var(--crimson);
+}
+
+.adminToggle {
+  text-align: center;
+  margin-top: 3rem;
+  font-size: 0.8rem;
+  color: #555;
+  cursor: pointer;
+}
+
+.adminToggle:hover {
+  color: #888;
+}
+
+/* Error message styling */
+.errorMsg {
+  color: var(--crimson);
+  font-size: 0.85rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .leftPanel {
+    flex: none;
+    padding: 3rem 2rem;
+  }
+  .rightPanel {
+    flex: none;
+    padding: 3rem 2rem;
+  }
+}
