@@ -81,11 +81,17 @@ export default function LoginPage() {
         </p>
 
         <div className={styles.steps}>
-          <div className={`${styles.stepCard} ${mode === 'login' ? styles.active : ''}`}>
+          <div 
+            className={`${styles.stepCard} ${mode === 'login' ? styles.active : ''}`}
+            onClick={() => setMode('login')}
+          >
             <div className={styles.stepNumber}>1</div>
             <span className={styles.stepText}>Log in securely</span>
           </div>
-          <div className={`${styles.stepCard} ${mode === 'admin' ? styles.active : ''}`}>
+          <div 
+            className={`${styles.stepCard} ${mode === 'admin' ? styles.active : ''}`}
+            onClick={() => setMode('admin')}
+          >
             <div className={styles.stepNumber}>2</div>
             <span className={styles.stepText}>Admin Access</span>
           </div>
