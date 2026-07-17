@@ -37,22 +37,28 @@ export default function AdminDashboard() {
         </div>
 
         <div className={styles.profileArea}>
-          <div className={styles.profileCircle}>ADMIN</div>
+          <div className={styles.profileCircle}>A</div>
         </div>
       </nav>
 
       {/* Main Content Area */}
       <main className={styles.mainContent}>
         {activeTab === 'addUser' && (
-          <h1 className={styles.placeholderText}>Add User Section</h1>
+          <div className={styles.sectionContent} key="addUser">
+            <h1 className={styles.placeholderText}>Add User Section</h1>
+          </div>
         )}
         
         {activeTab === 'createEvent' && (
-          <h1 className={styles.placeholderText}>Create Event Section</h1>
+          <div className={styles.sectionContent} key="createEvent">
+            <h1 className={styles.placeholderText}>Create Event Section</h1>
+          </div>
         )}
         
         {activeTab === 'attendance' && (
-          <h1 className={styles.placeholderText}>Attendance Section</h1>
+          <div className={styles.sectionContent} key="attendance">
+            <h1 className={styles.placeholderText}>Attendance Section</h1>
+          </div>
         )}
       </main>
     </div>

@@ -29,7 +29,7 @@
 .logoIcon {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--crimson);
+  border: 2px solid #fff;
   border-radius: 50%;
 }
 
@@ -37,7 +37,7 @@
   font-family: var(--font-playfair), serif;
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--crimson);
+  color: #fff;
 }
 
 .navTabs {
@@ -85,14 +85,24 @@
 .profileCircle {
   width: 40px;
   height: 40px;
-  background: #333;
+  background: var(--crimson);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: #fff;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sectionContent {
+  animation: fadeIn 0.4s ease forwards;
 }
 
 /* Main Content */
