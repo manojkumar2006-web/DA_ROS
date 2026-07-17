@@ -20,8 +20,8 @@ export async function POST(request: Request) {
       
       // Upsert admin user
       const adminUser = await User.findOneAndUpdate(
-        { contactNumber: '0000000000' }, // Default admin number or use the one provided
-        { name: 'Administrator', contactNumber, role: 'admin' },
+        { contactNumber: '0000000000' }, 
+        { name: 'Administrator', contactNumber: '0000000000', role: 'admin' },
         { upsert: true, new: true }
       );
       userId = adminUser._id.toString();

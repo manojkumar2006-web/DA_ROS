@@ -127,18 +127,20 @@ export default function LoginPage() {
               </div>
             )}
 
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Contact Number</label>
-              <input
-                type="tel"
-                className={styles.input}
-                placeholder="10-digit mobile number"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                maxLength={10}
-                required
-              />
-            </div>
+            {mode === 'login' && (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Contact Number</label>
+                <input
+                  type="tel"
+                  className={styles.input}
+                  placeholder="10-digit mobile number"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  maxLength={10}
+                  required
+                />
+              </div>
+            )}
 
             {mode === 'admin' && (
               <div className={styles.formGroup}>
