@@ -24,7 +24,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    if (!/^\d{10}$/.test(contactNumber)) {
+    if (mode === 'login' && !/^\d{10}$/.test(contactNumber)) {
       setError('Contact number must be exactly 10 digits.');
       return;
     }
