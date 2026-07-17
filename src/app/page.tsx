@@ -118,8 +118,8 @@ export default function Home() {
           Join our church family through every gathering, fellowship, and special event. Sign in to register for upcoming events, or access the admin portal to organize and manage church activities.
         </p>
         <div className={styles.s3ButtonGroup}>
-          <button className={styles.s3BtnPrimary}>Login</button>
-          <button className={styles.s3BtnSecondary}>Admin</button>
+          <Link href="/login" className={styles.s3BtnPrimary}>Login</Link>
+          <Link href="/login?mode=admin" className={styles.s3BtnSecondary}>Admin</Link>
         </div>
       </section>
     </main>
