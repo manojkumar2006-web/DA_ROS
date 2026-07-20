@@ -4,10 +4,10 @@ import User from '@/models/User';
 import Attendance from '@/models/Attendance';
 import Event from '@/models/Event';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
-    const userId = params.id;
+    const { id: userId } = await params;
 
     // Fetch the user
     const user = await User.findById(userId);
