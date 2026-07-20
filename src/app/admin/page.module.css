@@ -141,6 +141,21 @@
   font-family: var(--font-playfair), serif;
 }
 
+.btnImport {
+  background: transparent;
+  color: var(--crimson);
+  border: 1px solid var(--crimson);
+  padding: 0.7rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 1rem;
+}
+.btnImport:hover {
+  background: rgba(220, 20, 60, 0.1);
+}
+
 .btnAddUser {
   background: var(--crimson);
   color: #fff;

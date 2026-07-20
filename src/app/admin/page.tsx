@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import styles from './page.module.css';
 
 export default function AdminDashboard() {
@@ -16,6 +17,12 @@ export default function AdminDashboard() {
   const [newUserPhone, setNewUserPhone] = useState('');
   const [modalError, setModalError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Import State
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importError, setImportError] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
 
   // Fetch users when on Add User tab
   useEffect(() => {
@@ -109,6 +116,47 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleImportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!importFile) return;
+
+    setImportError('');
+    setIsImporting(true);
+
+    try {
+      const data = await importFile.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const json: any[] = XLSX.utils.sheet_to_json(worksheet);
+      
+      const usersToImport = json.map(row => ({
+        name: row['Name'] || row['name'] || '',
+        contactNumber: String(row['Contact Number'] || row['Contact'] || row['contactNumber'] || row['Phone'] || '')
+      }));
+
+      const res = await fetch('/api/admin/users/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ users: usersToImport })
+      });
+
+      const resultData = await res.json();
+      if (!res.ok) {
+        throw new Error(resultData.error || 'Failed to import users');
+      }
+
+      setIsImportModalOpen(false);
+      setImportFile(null);
+      alert(`Successfully processed! Inserted: ${resultData.insertedCount + resultData.upsertedCount}, Updated: ${resultData.modifiedCount}`);
+      fetchUsers();
+    } catch (err: any) {
+      setImportError(err.message);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
@@ -153,9 +201,14 @@ export default function AdminDashboard() {
             
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>User Management</h2>
-              <button className={styles.btnAddUser} onClick={() => setIsModalOpen(true)}>
-                + Add User
-              </button>
+              <div>
+                <button className={styles.btnImport} onClick={() => setIsImportModalOpen(true)}>
+                  Import
+                </button>
+                <button className={styles.btnAddUser} onClick={() => setIsModalOpen(true)}>
+                  + Add User
+                </button>
+              </div>
             </div>
 
             <div className={styles.usersLayout}>
@@ -275,6 +328,38 @@ export default function AdminDashboard() {
               </div>
             )}
             
+            {/* Import Users Modal */}
+            {isImportModalOpen && (
+              <div className={styles.modalOverlay}>
+                <div className={styles.modalContent}>
+                  <h3 className={styles.modalTitle}>Import Users (Excel)</h3>
+                  <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                    Upload an .xlsx or .csv file. It must contain columns named <strong>Name</strong> and <strong>Contact Number</strong>.
+                  </p>
+                  {importError && <div style={{ color: 'var(--crimson)', marginBottom: '1rem', fontSize: '0.9rem' }}>{importError}</div>}
+                  
+                  <form onSubmit={handleImportSubmit}>
+                    <div className={styles.formGroup}>
+                      <input 
+                        type="file" 
+                        accept=".xlsx, .xls, .csv" 
+                        onChange={(e) => setImportFile(e.target.files ? e.target.files[0] : null)}
+                        required
+                        style={{ border: 'none', padding: 0 }}
+                      />
+                    </div>
+                    
+                    <div className={styles.modalActions}>
+                      <button type="button" className={styles.btnSecondary} onClick={() => { setIsImportModalOpen(false); setImportFile(null); setImportError(''); }}>Cancel</button>
+                      <button type="submit" className={styles.btnPrimary} disabled={isImporting || !importFile}>
+                        {isImporting ? 'Importing...' : 'Upload & Import'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
         
