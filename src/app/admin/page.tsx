@@ -95,6 +95,20 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setUsers(users.filter(u => u._id !== userId));
+        setSelectedUser(null);
+        setUserDetails(null);
+      }
+    } catch (err) {
+      console.error('Failed to delete user', err);
+    }
+  };
+
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
@@ -171,8 +185,16 @@ export default function AdminDashboard() {
                 ) : (
                   <>
                     <div className={styles.detailsHeader}>
-                      <h3 className={styles.detailsTitle}>{selectedUser.name}</h3>
-                      <div className={styles.detailsPhone}>{selectedUser.contactNumber}</div>
+                      <div className={styles.detailsTitleArea}>
+                        <h3 className={styles.detailsTitle}>{selectedUser.name}</h3>
+                        <div className={styles.detailsPhone}>{selectedUser.contactNumber}</div>
+                      </div>
+                      <button 
+                        className={styles.btnDelete}
+                        onClick={() => handleDeleteUser(selectedUser._id)}
+                      >
+                        Delete User
+                      </button>
                     </div>
 
                     <div className={styles.eventsGrid}>

@@ -233,6 +233,28 @@
   margin-bottom: 2rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.detailsTitleArea {
+  display: flex;
+  flex-direction: column;
+}
+.btnDelete {
+  background: rgba(220, 20, 60, 0.1);
+  color: var(--crimson);
+  border: 1px solid var(--crimson);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+.btnDelete:hover {
+  background: var(--crimson);
+  color: #fff;
 }
 .detailsTitle {
   font-size: 2rem;
