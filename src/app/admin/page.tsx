@@ -53,14 +53,32 @@ export default function AdminDashboard() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
 
+  // Weekly Schedule State (for suggestions)
+  const [weeklySchedule, setWeeklySchedule] = useState<Record<string, string[]>>({});
+
   // Fetch users when on Add User tab
   useEffect(() => {
     if (activeTab === 'addUser') {
       fetchUsers();
     } else if (activeTab === 'createEvent') {
       fetchEvents();
+      fetchWeeklySchedule();
     }
   }, [activeTab]);
+
+  const fetchWeeklySchedule = async () => {
+    try {
+      const res = await fetch('/api/admin/weekly-schedule');
+      const data = await res.json();
+      if (data.schedule) {
+        const map: Record<string, string[]> = {};
+        data.schedule.forEach((s: any) => { map[s.day] = s.services; });
+        setWeeklySchedule(map);
+      }
+    } catch (err) {
+      console.error('Failed to fetch weekly schedule', err);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -575,7 +593,7 @@ export default function AdminDashboard() {
 
             <div className={styles.usersLayout}>
               {/* Left Column: Events List */}
-              <div className={styles.usersSidebar}>
+              <div className={styles.eventSidebar}>
                 
                 {/* CALENDAR CARD */}
                 <div className={styles.calendarCard}>
@@ -718,6 +736,30 @@ export default function AdminDashboard() {
                         required 
                         placeholder="e.g. Sunday Worship Service"
                       />
+                      {/* Suggestions based on selected day */}
+                      {newEventDate && (() => {
+                        const dayName = new Date(newEventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' });
+                        const suggestions = weeklySchedule[dayName] || [];
+                        return suggestions.length > 0 ? (
+                          <div>
+                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem', marginBottom: '0.3rem' }}>
+                              Suggested for {dayName}:
+                            </div>
+                            <div className={styles.suggestionChips}>
+                              {suggestions.map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  className={styles.suggestionChip}
+                                  onClick={() => setNewEventName(s)}
+                                >
+                                  {s}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
                     
                     <div style={{ display: 'flex', gap: '1rem' }}>

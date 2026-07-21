@@ -191,6 +191,21 @@
   gap: 0.5rem;
 }
 
+/* Wider sidebar for create event tab (has calendar inside) */
+.eventSidebar {
+  flex: 0 0 340px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  height: 780px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .sidebarTitle {
   font-size: 1.1rem;
   font-weight: 600;
@@ -335,22 +350,31 @@
 /* Modal */
 .modalOverlay {
   position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
 }
 .modalContent {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  background: rgba(15, 15, 15, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
   padding: 2.5rem;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
 }
 .modalTitle {
   font-size: 1.5rem;
@@ -377,13 +401,12 @@
 
 /* Calendar Styles */
 .calendarCard {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
 }
 .calendarHeader {
   display: flex;
@@ -411,26 +434,27 @@
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.3rem;
+  gap: 2px;
   text-align: center;
+  width: 100%;
 }
 .calendarDayName {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #888;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
+  padding: 0.3rem 0;
+  text-align: center;
 }
 .calendarDate {
-  width: 32px;
-  height: 32px;
+  aspect-ratio: 1;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto;
   border-radius: 50%;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   position: relative;
 }
 .calendarDate:hover:not(.emptyDate) {
@@ -472,6 +496,28 @@
 }
 .calendarClearBtn:hover {
   background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+/* Suggestion Chips */
+.suggestionChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.suggestionChip {
+  background: rgba(220, 20, 60, 0.12);
+  border: 1px solid rgba(220, 20, 60, 0.35);
+  color: #f88;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.suggestionChip:hover {
+  background: rgba(220, 20, 60, 0.3);
   color: #fff;
 }
 
