@@ -38,6 +38,14 @@ export default function AdminDashboard() {
   const [eventModalError, setEventModalError] = useState('');
   const [isEventSubmitting, setIsEventSubmitting] = useState(false);
 
+  const [isEditEventModalOpen, setIsEditEventModalOpen] = useState(false);
+  const [editEventId, setEditEventId] = useState('');
+  const [editEventName, setEditEventName] = useState('');
+  const [editEventDate, setEditEventDate] = useState('');
+  const [editEventTime, setEditEventTime] = useState('');
+  const [editEventLocation, setEditEventLocation] = useState('');
+  const [editEventCost, setEditEventCost] = useState('');
+
   // Fetch users when on Add User tab
   useEffect(() => {
     if (activeTab === 'addUser') {
@@ -249,6 +257,50 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Failed to delete event', err);
+    }
+  };
+
+  const handleOpenEditEvent = (event: any) => {
+    setEditEventId(event._id);
+    setEditEventName(event.eventName);
+    setEditEventDate(event.date);
+    setEditEventTime(event.time);
+    setEditEventLocation(event.locationAddress);
+    setEditEventCost(event.travelCost);
+    setIsEditEventModalOpen(true);
+  };
+
+  const handleEditEventSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEventModalError('');
+    setIsEventSubmitting(true);
+
+    try {
+      const res = await fetch(`/api/admin/events/${editEventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          eventName: editEventName, 
+          date: editEventDate, 
+          time: editEventTime, 
+          locationAddress: editEventLocation, 
+          travelCost: editEventCost 
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update event');
+      }
+
+      setEvents(events.map(ev => ev._id === editEventId ? data.event : ev));
+      setSelectedEvent(data.event);
+      setIsEditEventModalOpen(false);
+    } catch (err: any) {
+      setEventModalError(err.message);
+    } finally {
+      setIsEventSubmitting(false);
     }
   };
 
@@ -500,12 +552,20 @@ export default function AdminDashboard() {
                         <div className={styles.detailsPhone}>{selectedEvent.date} | {selectedEvent.time}</div>
                         <div style={{color: '#888', marginTop: '0.5rem'}}>Estimated Travel Cost: ₹{selectedEvent.travelCost}</div>
                       </div>
-                      <button 
-                        className={styles.btnDelete}
-                        onClick={() => handleDeleteEvent(selectedEvent._id)}
-                      >
-                        Delete Event
-                      </button>
+                      <div style={{ display: 'flex' }}>
+                        <button 
+                          className={styles.btnEdit}
+                          onClick={() => handleOpenEditEvent(selectedEvent)}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          className={styles.btnDelete}
+                          onClick={() => handleDeleteEvent(selectedEvent._id)}
+                        >
+                          Delete Event
+                        </button>
+                      </div>
                     </div>
 
                     <div className={styles.eventsGrid}>
@@ -613,6 +673,77 @@ export default function AdminDashboard() {
                       <button type="button" className={styles.btnSecondary} onClick={() => setIsEventModalOpen(false)}>Cancel</button>
                       <button type="submit" className={styles.btnPrimary} disabled={isEventSubmitting}>
                         {isEventSubmitting ? 'Creating...' : 'Create Event'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Event Modal */}
+            {isEditEventModalOpen && (
+              <div className={styles.modalOverlay}>
+                <div className={styles.modalContent}>
+                  <h3 className={styles.modalTitle}>Edit Event</h3>
+                  {eventModalError && <div style={{ color: 'var(--crimson)', marginBottom: '1rem', fontSize: '0.9rem' }}>{eventModalError}</div>}
+                  
+                  <form onSubmit={handleEditEventSubmit}>
+                    <div className={styles.formGroup}>
+                      <label>Event Name</label>
+                      <input 
+                        type="text" 
+                        value={editEventName} 
+                        onChange={e => setEditEventName(e.target.value)} 
+                        required 
+                      />
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <div className={styles.formGroup} style={{ flex: 1 }}>
+                        <label>Date</label>
+                        <input 
+                          type="date" 
+                          value={editEventDate} 
+                          onChange={e => setEditEventDate(e.target.value)} 
+                          required 
+                        />
+                      </div>
+                      <div className={styles.formGroup} style={{ flex: 1 }}>
+                        <label>Time</label>
+                        <input 
+                          type="time" 
+                          value={editEventTime} 
+                          onChange={e => setEditEventTime(e.target.value)} 
+                          required 
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Location (Physical Address)</label>
+                      <input 
+                        type="text" 
+                        value={editEventLocation} 
+                        onChange={e => setEditEventLocation(e.target.value)} 
+                        required 
+                      />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Travel Cost (₹)</label>
+                      <input 
+                        type="number" 
+                        value={editEventCost} 
+                        onChange={e => setEditEventCost(e.target.value)} 
+                        required 
+                        min="0"
+                      />
+                    </div>
+
+                    <div className={styles.modalActions}>
+                      <button type="button" className={styles.btnSecondary} onClick={() => setIsEditEventModalOpen(false)}>Cancel</button>
+                      <button type="submit" className={styles.btnPrimary} disabled={isEventSubmitting}>
+                        {isEventSubmitting ? 'Saving...' : 'Save Changes'}
                       </button>
                     </div>
                   </form>

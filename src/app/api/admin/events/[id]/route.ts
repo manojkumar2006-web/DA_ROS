@@ -44,3 +44,27 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await dbConnect();
+    const { id: eventId } = await params;
+    const body = await request.json();
+    const { eventName, date, time, locationAddress, travelCost } = body;
+
+    const event = await Event.findByIdAndUpdate(
+      eventId,
+      { eventName, date, time, locationAddress, travelCost },
+      { new: true }
+    );
+
+    if (!event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ event });
+  } catch (error: any) {
+    console.error('Error updating event:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
