@@ -755,8 +755,8 @@ export default function AdminDashboard() {
                 </div>
 
                 {eventViewMode === 'calendar' ? (
-                  {/* CALENDAR CARD */}
                   <div className={styles.calendarCard}>
+                    {/* CALENDAR CARD */}
                     <div className={styles.calendarHeader}>
                       <button className={styles.calendarNavBtn} onClick={handlePrevMonth}>&lt;</button>
                       <h4>{new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
@@ -792,8 +792,8 @@ export default function AdminDashboard() {
                     )}
                   </div>
                 ) : (
-                  {/* TIMELINE VIEW */}
                   <div className={styles.calendarCard} style={{ maxHeight: '420px', overflowY: 'auto', padding: '1rem' }}>
+                    {/* TIMELINE VIEW */}
                     {events.length === 0 ? (
                       <div style={{ color: '#888', textAlign: 'center', padding: '2rem 0' }}>No upcoming events</div>
                     ) : (
