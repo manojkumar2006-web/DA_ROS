@@ -72,8 +72,21 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (data.schedule) {
         const map: Record<string, string[]> = {};
-        data.schedule.forEach((s: any) => { map[s.day] = s.services; });
-        setWeeklySchedule(map);
+        if (data.schedule && data.schedule.length > 0) {
+          const map: Record<string, string[]> = {};
+          data.schedule.forEach((s: any) => { map[s.day] = s.services; });
+          setWeeklySchedule(map);
+        } else {
+          // Auto-seed if DB is empty
+          await fetch('/api/admin/weekly-schedule/seed', { method: 'POST' });
+          const seeded = await fetch('/api/admin/weekly-schedule');
+          const seededData = await seeded.json();
+          if (seededData.schedule) {
+            const map: Record<string, string[]> = {};
+            seededData.schedule.forEach((s: any) => { map[s.day] = s.services; });
+            setWeeklySchedule(map);
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to fetch weekly schedule', err);
