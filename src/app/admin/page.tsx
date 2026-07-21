@@ -209,85 +209,58 @@ export default function AdminDashboard() {
       const rawRows: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
       if (rawRows.length === 0) throw new Error('The sheet appears to be empty.');
 
-      // ── Smart Column Detection ───────────────────────────────────────────
-      const headerRow: string[] = rawRows[0].map((h: any) => String(h).toLowerCase().trim());
-      const dataRows = rawRows.slice(1).filter((r: any[]) => r.some(c => String(c).trim() !== ''));
-
-      const nameKeywords    = ['name', 'full name', 'fullname', 'member', 'person', 'member name', 'नाम'];
-      const phoneKeywords   = ['phone', 'mobile', 'contact', 'number', 'phone number', 'mobile number', 'contact number', 'cell', 'whatsapp', 'ph', 'mob', 'tel'];
-
-      const scoreCol = (keywords: string[], col: number) => {
-        const header = headerRow[col] || '';
-        return keywords.some(k => header.includes(k)) ? 10 : 0;
-      };
-
-      const isPhoneContent = (col: number) => {
-        const hits = dataRows.filter(r => {
-          const str = String(r[col] ?? '');
-          return str.replace(/\D/g, '').length >= 10;
-        }).length;
-        return hits > dataRows.length * 0.2; // >20% rows have 10+ digits
-      };
-
-      const isNameContent = (col: number) => {
-        const hits = dataRows.filter(r => {
-          const str = String(r[col] ?? '').trim();
-          // Has letters, length > 2, and not mostly numbers
-          return str.length > 2 && /[a-zA-Z\u0900-\u097F]/.test(str) && str.replace(/\D/g, '').length < 5;
-        }).length;
-        return hits > dataRows.length * 0.4;
-      };
-
-      const numCols = Math.max(...rawRows.map(r => r.length));
-      let nameCol = -1, phoneCol = -1;
-
-      // Pass 1: keyword match
-      for (let c = 0; c < numCols; c++) {
-        if (nameCol  === -1 && scoreCol(nameKeywords,  c) > 0) nameCol  = c;
-        if (phoneCol === -1 && scoreCol(phoneKeywords, c) > 0) phoneCol = c;
-      }
-
-      // Pass 2: content-based fallback
-      for (let c = 0; c < numCols; c++) {
-        if (phoneCol === -1 && isPhoneContent(c)) phoneCol = c;
-      }
-      for (let c = 0; c < numCols; c++) {
-        if (nameCol === -1 && isNameContent(c) && c !== phoneCol) nameCol = c;
-      }
-
-      // Pass 3: last resort
-      if (nameCol  === -1) nameCol  = 0;
-      if (phoneCol === -1) phoneCol = nameCol === 0 ? 1 : 0;
-
-      // ── Build Users Array ────────────────────────────────────────────────
+      // ── Foolproof Row-by-Row Detection ──────────────────────────────────
+      // Instead of relying on headers or columns, we examine every cell in every row.
       const usersToImport: any[] = [];
       
-      dataRows.forEach(row => {
-        const name = String(row[nameCol] ?? '').trim();
-        if (!name) return;
-        
-        const rawPhoneStr = String(row[phoneCol] ?? '');
-        // Split by common separators to find multiple numbers
-        const parts = rawPhoneStr.split(/[\/,\n|&]/);
-        const numbers: string[] = [];
+      rawRows.forEach((row: any[]) => {
+        // Skip completely empty rows
+        if (!row || !row.some(c => String(c).trim() !== '')) return;
 
-        parts.forEach(part => {
-          const digits = part.replace(/\D/g, '');
-          if (digits.length >= 10) {
-            // Take the last 10 digits (ignores country codes like 91)
-            numbers.push(digits.slice(-10));
+        let detectedName = '';
+        const detectedNumbers: string[] = [];
+
+        // Check every cell in this row
+        row.forEach(cell => {
+          const cellStr = String(cell).trim();
+          if (!cellStr) return;
+
+          // Check if this cell contains phone numbers
+          const digitsOnly = cellStr.replace(/\D/g, '');
+          if (digitsOnly.length >= 10) {
+            // It might be one or more phone numbers (e.g., 9876543210 / 1234567890)
+            const parts = cellStr.split(/[\/,\n|&]/);
+            parts.forEach(part => {
+              const d = part.replace(/\D/g, '');
+              if (d.length >= 10) {
+                detectedNumbers.push(d.slice(-10));
+              }
+            });
+          } 
+          // If it's not a phone number, check if it looks like a name
+          else if (!detectedName && cellStr.length > 2 && /[a-zA-Z\u0900-\u097F]/.test(cellStr)) {
+            // A name usually doesn't have numbers in it (skip emails or random IDs if possible)
+            if (!cellStr.includes('@') && cellStr.replace(/\D/g, '').length < 3) {
+               // Avoid picking up header words like "Name", "Phone", "S.No"
+               const lower = cellStr.toLowerCase();
+               if (!['name', 'phone', 'contact', 'mobile', 's.no', 'sl no'].includes(lower)) {
+                 detectedName = cellStr;
+               }
+            }
           }
         });
 
-        if (numbers.length > 0) {
-          usersToImport.push({ name, contactNumber: numbers.join(' / ') });
-        } else {
-          usersToImport.push({ name, contactNumber: 'no number' });
+        // Only add if we found a valid name in this row
+        if (detectedName) {
+          usersToImport.push({
+            name: detectedName,
+            contactNumber: detectedNumbers.length > 0 ? detectedNumbers.join(' / ') : 'no number'
+          });
         }
       });
 
       if (usersToImport.length === 0) {
-        throw new Error('Could not detect valid user data. Please check the file.');
+        throw new Error('Could not detect valid user data in any row. Please check the file.');
       }
 
       const res = await fetch('/api/admin/users/import', {
