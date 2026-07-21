@@ -354,8 +354,9 @@ export default function AdminDashboard() {
     } finally {
       setIsEventSubmitting(false);
     }
-  const displayedEvents = selectedCalendarDate ? events.filter(e => e.date === selectedCalendarDate) : events;
+  };
 
+  const displayedEvents = selectedCalendarDate ? events.filter(e => e.date === selectedCalendarDate) : events;
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
