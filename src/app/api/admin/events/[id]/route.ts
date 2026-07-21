@@ -50,11 +50,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     await dbConnect();
     const { id: eventId } = await params;
     const body = await request.json();
-    const { eventName, date, time, locationAddress, travelCost } = body;
+    const { eventName, date, time, locationAddress, travelCost, gmapLink } = body;
 
     const event = await Event.findByIdAndUpdate(
       eventId,
-      { eventName, date, time, locationAddress, travelCost },
+      { eventName, date, time, locationAddress, travelCost, gmapLink },
       { new: true }
     );
 

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const { eventName, date, time, locationAddress, travelCost } = body;
+    const { eventName, date, time, locationAddress, travelCost, gmapLink } = body;
 
     if (!eventName || !date || !time || !locationAddress) {
       return NextResponse.json({ error: 'Name, date, time, and location are required' }, { status: 400 });
@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       date,
       time,
       locationAddress,
+      gmapLink: gmapLink || '',
       travelCost: travelCost || '0'
     });
 

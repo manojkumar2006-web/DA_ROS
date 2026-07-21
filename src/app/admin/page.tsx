@@ -34,6 +34,7 @@ export default function AdminDashboard() {
   const [newEventDate, setNewEventDate] = useState('');
   const [newEventTime, setNewEventTime] = useState('');
   const [newEventLocation, setNewEventLocation] = useState('');
+  const [newEventGmapLink, setNewEventGmapLink] = useState('');
   const [newEventCost, setNewEventCost] = useState('');
   const [eventModalError, setEventModalError] = useState('');
   const [isEventSubmitting, setIsEventSubmitting] = useState(false);
@@ -44,6 +45,7 @@ export default function AdminDashboard() {
   const [editEventDate, setEditEventDate] = useState('');
   const [editEventTime, setEditEventTime] = useState('');
   const [editEventLocation, setEditEventLocation] = useState('');
+  const [editEventGmapLink, setEditEventGmapLink] = useState('');
   const [editEventCost, setEditEventCost] = useState('');
 
   // Fetch users when on Add User tab
@@ -222,6 +224,7 @@ export default function AdminDashboard() {
           date: newEventDate, 
           time: newEventTime, 
           locationAddress: newEventLocation, 
+          gmapLink: newEventGmapLink,
           travelCost: newEventCost 
         }),
       });
@@ -238,6 +241,7 @@ export default function AdminDashboard() {
       setNewEventDate('');
       setNewEventTime('');
       setNewEventLocation('');
+      setNewEventGmapLink('');
       setNewEventCost('');
     } catch (err: any) {
       setEventModalError(err.message);
@@ -266,6 +270,7 @@ export default function AdminDashboard() {
     setEditEventDate(event.date);
     setEditEventTime(event.time);
     setEditEventLocation(event.locationAddress);
+    setEditEventGmapLink(event.gmapLink || '');
     setEditEventCost(event.travelCost);
     setIsEditEventModalOpen(true);
   };
@@ -284,6 +289,7 @@ export default function AdminDashboard() {
           date: editEventDate, 
           time: editEventTime, 
           locationAddress: editEventLocation, 
+          gmapLink: editEventGmapLink,
           travelCost: editEventCost 
         }),
       });
@@ -578,7 +584,11 @@ export default function AdminDashboard() {
                             loading="lazy"
                             allowFullScreen
                             referrerPolicy="no-referrer-when-downgrade"
-                            src={`https://www.google.com/maps?q=${encodeURIComponent(selectedEvent.locationAddress)}&output=embed`}
+                            src={
+                              selectedEvent.gmapLink && selectedEvent.gmapLink.includes('embed') 
+                                ? selectedEvent.gmapLink.replace(/<iframe.*src="([^"]*)".*<\/iframe>/, '$1') // Extract src if they paste full iframe
+                                : `https://www.google.com/maps?q=${encodeURIComponent(selectedEvent.gmapLink || selectedEvent.locationAddress)}&output=embed`
+                            }
                           ></iframe>
                         </div>
                       </div>
@@ -658,6 +668,16 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className={styles.formGroup}>
+                      <label>Google Maps Link (Optional)</label>
+                      <input 
+                        type="text" 
+                        value={newEventGmapLink} 
+                        onChange={e => setNewEventGmapLink(e.target.value)} 
+                        placeholder="Map query or embed URL"
+                      />
+                    </div>
+
+                    <div className={styles.formGroup}>
                       <label>Travel Cost (₹)</label>
                       <input 
                         type="number" 
@@ -726,6 +746,15 @@ export default function AdminDashboard() {
                         value={editEventLocation} 
                         onChange={e => setEditEventLocation(e.target.value)} 
                         required 
+                      />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Google Maps Link (Optional)</label>
+                      <input 
+                        type="text" 
+                        value={editEventGmapLink} 
+                        onChange={e => setEditEventGmapLink(e.target.value)} 
                       />
                     </div>
 

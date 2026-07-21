@@ -13,7 +13,14 @@ const EventSchema = new mongoose.Schema<IEvent>({
   eventName: { type: String, required: true },
   date: { type: String, required: true },
   time: { type: String, required: true },
-  locationAddress: { type: String, required: true },
+  locationAddress: {
+    type: String,
+    required: [true, 'Please provide the physical location address for the event'],
+  },
+  gmapLink: {
+    type: String,
+    required: false,
+  },
   travelCost: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
 });
