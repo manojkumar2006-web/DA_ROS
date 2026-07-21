@@ -396,16 +396,40 @@ export default function AdminDashboard() {
       return;
     }
 
-    const data = usersList.map((u, i) => ({
-      'S.No': i + 1,
-      'Name': u.name,
-      'Contact Number': u.contactNumber
-    }));
+    // 1. Prepare Title and Header data
+    const eventName = attendanceSelectedEvent?.eventName || 'Event';
+    const eventDate = attendanceSelectedEvent?.date || '';
+    const eventTime = attendanceSelectedEvent?.time || '';
+    const location = attendanceSelectedEvent?.locationAddress || '';
 
-    const ws = XLSX.utils.json_to_sheet(data);
+    // Create an array of arrays for the exact layout we want
+    const sheetData = [
+      [`ATTENDANCE REPORT: ${eventName.toUpperCase()}`],
+      [`Date: ${eventDate}   |   Time: ${eventTime}`],
+      [`Location: ${location}`],
+      [], // Blank row for spacing
+      ['S.No', 'Full Name', 'Contact Number'], // Table Headers
+    ];
+
+    // Append actual user data rows
+    usersList.forEach((u, i) => {
+      sheetData.push([i + 1, u.name, u.contactNumber]);
+    });
+
+    // 2. Convert to worksheet
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // 3. Set professional column widths
+    ws['!cols'] = [
+      { wch: 10 }, // A: S.No (wider than default)
+      { wch: 35 }, // B: Name (plenty of room for long names)
+      { wch: 25 }  // C: Contact Number
+    ];
+
+    // 4. Export
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Attendance");
-    XLSX.writeFile(wb, `${attendanceSelectedEvent?.eventName || 'Event'}_Attendance.xlsx`);
+    XLSX.writeFile(wb, `${eventName}_Attendance.xlsx`);
   };
 
   const handleAddEventSubmit = async (e: React.FormEvent) => {
