@@ -303,6 +303,20 @@
 .eventCard p { font-size: 0.85rem; color: #888; }
 .noEvents { font-size: 0.9rem; color: #666; font-style: italic; }
 
+.mapContainer {
+  margin-top: 1.5rem;
+  width: 100%;
+  height: 250px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.mapContainer iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 /* Modal */
 .modalOverlay {
   position: fixed;
