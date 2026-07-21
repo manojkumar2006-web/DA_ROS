@@ -275,14 +275,11 @@ export default function AdminDashboard() {
         const numbers = digitsOnly.match(/\d{10}/g) || [];
 
         if (numbers.length > 0) {
-          // If they have multiple numbers, save each one dynamically
-          numbers.forEach(num => {
-            usersToImport.push({ name, contactNumber: num });
-          });
+          // If they have multiple numbers, join them together
+          usersToImport.push({ name, contactNumber: numbers.join(' / ') });
         } else {
-          // If the number is missing completely, generate a smooth placeholder (e.g. 000xxxxxxx)
-          const randomSuffix = Math.floor(1000000 + Math.random() * 9000000); // 7 random digits
-          usersToImport.push({ name, contactNumber: `000${randomSuffix}` });
+          // If the number is missing completely, use "no number"
+          usersToImport.push({ name, contactNumber: 'no number' });
         }
       });
 

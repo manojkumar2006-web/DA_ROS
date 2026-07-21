@@ -12,31 +12,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No valid users provided' }, { status: 400 });
     }
 
-    // Filter out invalid rows (missing name or invalid phone number)
-    const validUsers = users.filter((u: any) => {
-      const contactStr = String(u.contactNumber || '').trim();
-      return u.name && contactStr && /^\d{10}$/.test(contactStr);
-    });
+    // Filter out invalid rows (must have at least a name)
+    const validUsers = users.filter((u: any) => u.name && u.name.trim() !== '');
 
     if (validUsers.length === 0) {
-      return NextResponse.json({ error: 'No valid rows found. Ensure numbers are exactly 10 digits.' }, { status: 400 });
+      return NextResponse.json({ error: 'No valid rows found.' }, { status: 400 });
     }
 
     // Prepare bulk operations
     const bulkOps = validUsers.map((u: any) => {
-      const contactStr = String(u.contactNumber).trim();
-      return {
-        updateOne: {
-          filter: { contactNumber: contactStr },
-          update: { 
-            $set: { 
-              name: String(u.name).trim(), 
-              role: 'user' 
-            } 
-          },
-          upsert: true
-        }
-      };
+      const contactStr = String(u.contactNumber || 'no number').trim();
+      const nameStr = String(u.name).trim();
+
+      if (contactStr === 'no number') {
+        // If no number, always insert as a new record
+        return {
+          insertOne: {
+            document: { name: nameStr, contactNumber: 'no number', role: 'user' }
+          }
+        };
+      } else {
+        // If there's a valid number, update existing or insert new
+        return {
+          updateOne: {
+            filter: { contactNumber: contactStr },
+            update: { $set: { name: nameStr, role: 'user' } },
+            upsert: true
+          }
+        };
+      }
     });
 
     // Execute bulk write
