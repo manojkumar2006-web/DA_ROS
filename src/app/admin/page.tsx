@@ -204,12 +204,73 @@ export default function AdminDashboard() {
       const workbook = XLSX.read(data, { type: 'array' });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      const json: any[] = XLSX.utils.sheet_to_json(worksheet);
-      
-      const usersToImport = json.map(row => ({
-        name: row['Name'] || row['name'] || '',
-        contactNumber: String(row['Contact Number'] || row['Contact'] || row['contactNumber'] || row['Phone'] || '')
-      }));
+
+      // Read raw rows including header (defval keeps empty cells as '')
+      const rawRows: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+      if (rawRows.length === 0) throw new Error('The sheet appears to be empty.');
+
+      // ── Smart Column Detection ───────────────────────────────────────────
+      // Strategy: scan header row (row 0) for keyword hints,
+      // then confirm by checking actual cell content in data rows.
+
+      const headerRow: string[] = rawRows[0].map((h: any) => String(h).toLowerCase().trim());
+      const dataRows = rawRows.slice(1).filter((r: any[]) => r.some(c => String(c).trim() !== ''));
+
+      // Keyword sets
+      const nameKeywords    = ['name', 'full name', 'fullname', 'member', 'person', 'member name', 'नाम'];
+      const phoneKeywords   = ['phone', 'mobile', 'contact', 'number', 'phone number', 'mobile number',
+                               'contact number', 'cell', 'whatsapp', 'ph', 'mob', 'tel'];
+
+      // Score each column index by keyword match
+      const scoreCol = (keywords: string[], col: number) => {
+        const header = headerRow[col] || '';
+        return keywords.some(k => header.includes(k)) ? 10 : 0;
+      };
+
+      // Also score by content: does this column mostly contain 10-digit numbers?
+      const isPhoneContent = (col: number) => {
+        const values = dataRows.map(r => String(r[col] ?? '').replace(/\D/g, ''));
+        const hits = values.filter(v => v.length === 10).length;
+        return hits > values.length * 0.5; // >50% rows look like phones
+      };
+
+      const isNameContent = (col: number) => {
+        const values = dataRows.map(r => String(r[col] ?? '').trim());
+        const hits = values.filter(v => v.length > 1 && /[a-zA-Z\u0900-\u097F]/.test(v)).length;
+        return hits > values.length * 0.5;
+      };
+
+      const numCols = Math.max(...rawRows.map(r => r.length));
+      let nameCol = -1, phoneCol = -1;
+
+      // Pass 1: keyword match
+      for (let c = 0; c < numCols; c++) {
+        if (nameCol  === -1 && scoreCol(nameKeywords,  c) > 0) nameCol  = c;
+        if (phoneCol === -1 && scoreCol(phoneKeywords, c) > 0) phoneCol = c;
+      }
+
+      // Pass 2: content-based fallback for unresolved columns
+      for (let c = 0; c < numCols; c++) {
+        if (phoneCol === -1 && isPhoneContent(c)) phoneCol = c;
+      }
+      for (let c = 0; c < numCols; c++) {
+        if (nameCol === -1 && isNameContent(c) && c !== phoneCol) nameCol = c;
+      }
+
+      // Pass 3: last resort — first column = name, second = phone
+      if (nameCol  === -1) nameCol  = 0;
+      if (phoneCol === -1) phoneCol = nameCol === 0 ? 1 : 0;
+
+      // ── Build Users Array ────────────────────────────────────────────────
+      const usersToImport = dataRows.map(row => {
+        const rawPhone = String(row[phoneCol] ?? '').replace(/\D/g, '').trim();
+        const name     = String(row[nameCol]  ?? '').trim();
+        return { name, contactNumber: rawPhone };
+      }).filter(u => u.name && u.contactNumber);
+
+      if (usersToImport.length === 0) {
+        throw new Error('Could not detect valid name + phone data. Please check the file.');
+      }
 
       const res = await fetch('/api/admin/users/import', {
         method: 'POST',
@@ -218,13 +279,11 @@ export default function AdminDashboard() {
       });
 
       const resultData = await res.json();
-      if (!res.ok) {
-        throw new Error(resultData.error || 'Failed to import users');
-      }
+      if (!res.ok) throw new Error(resultData.error || 'Failed to import users');
 
       setIsImportModalOpen(false);
       setImportFile(null);
-      alert(`Successfully processed! Inserted: ${resultData.insertedCount + resultData.upsertedCount}, Updated: ${resultData.modifiedCount}`);
+      alert(`✅ Import complete!\nNew: ${(resultData.insertedCount || 0) + (resultData.upsertedCount || 0)}  |  Updated: ${resultData.modifiedCount || 0}`);
       fetchUsers();
     } catch (err: any) {
       setImportError(err.message);
@@ -605,7 +664,7 @@ export default function AdminDashboard() {
                 <div className={styles.modalContent}>
                   <h3 className={styles.modalTitle}>Import Users (Excel)</h3>
                   <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                    Upload an .xlsx or .csv file. It must contain columns named <strong>Name</strong> and <strong>Contact Number</strong>.
+                    Upload an .xlsx or .csv file. The app will automatically detect columns containing names and 10-digit phone numbers.
                   </p>
                   {importError && <div style={{ color: 'var(--crimson)', marginBottom: '1rem', fontSize: '0.9rem' }}>{importError}</div>}
                   
