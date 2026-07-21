@@ -5,6 +5,7 @@ export interface IEvent extends mongoose.Document {
   date: string;
   time: string;
   locationAddress: string;
+  gmapLink?: string;
   travelCost: string;
   createdAt: Date;
 }
