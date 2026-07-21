@@ -32,10 +32,10 @@ export async function POST(request: Request) {
           }
         };
       } else {
-        // If there's a valid number, update existing or insert new
+        // If there's a valid number, update existing (if same name + number) or insert new
         return {
           updateOne: {
-            filter: { contactNumber: contactStr },
+            filter: { contactNumber: contactStr, name: nameStr },
             update: { $set: { name: nameStr, role: 'user' } },
             upsert: true
           }

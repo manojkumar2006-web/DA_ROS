@@ -238,12 +238,12 @@ export default function AdminDashboard() {
             });
           } 
           // If it's not a phone number, check if it looks like a name
-          else if (!detectedName && cellStr.length > 2 && /[a-zA-Z\u0900-\u097F]/.test(cellStr)) {
-            // A name usually doesn't have numbers in it (skip emails or random IDs if possible)
-            if (!cellStr.includes('@') && cellStr.replace(/\D/g, '').length < 3) {
-               // Avoid picking up header words like "Name", "Phone", "S.No"
+          else if (!detectedName && cellStr.length >= 2 && /[a-zA-Z\u0900-\u097F]/.test(cellStr)) {
+            // A name usually doesn't have emails, but might have some numbers
+            if (!cellStr.includes('@')) {
+               // Avoid picking up header words
                const lower = cellStr.toLowerCase();
-               if (!['name', 'phone', 'contact', 'mobile', 's.no', 'sl no'].includes(lower)) {
+               if (!['name', 'phone', 'contact', 'mobile', 's.no', 'sl no', 'sl.no'].includes(lower)) {
                  detectedName = cellStr;
                }
             }
