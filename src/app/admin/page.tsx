@@ -31,7 +31,10 @@ export default function AdminDashboard() {
   
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [newEventName, setNewEventName] = useState('');
-  const [newEventDate, setNewEventDate] = useState('');
+  const [newEventDate, setNewEventDate] = useState(() => {
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  });
   const [newEventTime, setNewEventTime] = useState('');
   const [newEventLocation, setNewEventLocation] = useState('');
   const [newEventGmapLink, setNewEventGmapLink] = useState('');
@@ -48,10 +51,14 @@ export default function AdminDashboard() {
   const [editEventGmapLink, setEditEventGmapLink] = useState('');
   const [editEventCost, setEditEventCost] = useState('');
 
-  // Calendar State
+  // Calendar State — default to today
+  const todayStr = (() => {
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  })();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(todayStr);
 
   // Weekly Schedule State (for suggestions)
   const [weeklySchedule, setWeeklySchedule] = useState<Record<string, string[]>>({});
@@ -263,12 +270,9 @@ export default function AdminDashboard() {
   };
 
   const handleAddEventClick = () => {
-    if (selectedCalendarDate) {
-      setNewEventDate(selectedCalendarDate);
-    } else {
-      const today = new Date();
-      setNewEventDate(`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`);
-    }
+    // Always pre-fill with calendar date if set, otherwise today
+    const dateToUse = selectedCalendarDate || todayStr;
+    setNewEventDate(dateToUse);
     setIsEventModalOpen(true);
   };
 
@@ -315,7 +319,8 @@ export default function AdminDashboard() {
       setEvents([data.event, ...events]); 
       setIsEventModalOpen(false);
       setNewEventName('');
-      setNewEventDate('');
+      // Reset to today after submit
+      setNewEventDate(todayStr);
       setNewEventTime('');
       setNewEventLocation('');
       setNewEventGmapLink('');
@@ -638,9 +643,9 @@ export default function AdminDashboard() {
                       );
                     })}
                   </div>
-                  {selectedCalendarDate && (
-                    <button className={styles.calendarClearBtn} onClick={() => setSelectedCalendarDate(null)}>
-                      Clear Date Filter
+                  {selectedCalendarDate && selectedCalendarDate !== todayStr && (
+                    <button className={styles.calendarClearBtn} onClick={() => setSelectedCalendarDate(todayStr)}>
+                      Back to Today
                     </button>
                   )}
                 </div>
