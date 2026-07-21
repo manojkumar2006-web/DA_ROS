@@ -68,3 +68,31 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await dbConnect();
+    const { id: eventId } = await params;
+    const { userId } = await request.json();
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    }
+
+    // Upsert: create if not exists (avoids duplicate error)
+    await Attendance.findOneAndUpdate(
+      { eventId, userId },
+      { eventId, userId },
+      { upsert: true, new: true }
+    );
+
+    // Return updated registered users list
+    const attendances = await Attendance.find({ eventId }).populate('userId');
+    const registeredUsers = attendances.map(att => att.userId).filter(u => u !== null);
+
+    return NextResponse.json({ registeredUsers });
+  } catch (error: any) {
+    console.error('Error registering user to event:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

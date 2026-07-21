@@ -63,12 +63,17 @@ export default function AdminDashboard() {
   // Weekly Schedule State (for suggestions)
   const [weeklySchedule, setWeeklySchedule] = useState<Record<string, string[]>>({});
 
+  // Add Users to Event modal
+  const [isAddUsersToEventOpen, setIsAddUsersToEventOpen] = useState(false);
+  const [addingUserId, setAddingUserId] = useState<string | null>(null);
+
   // Fetch users when on Add User tab
   useEffect(() => {
     if (activeTab === 'addUser') {
       fetchUsers();
     } else if (activeTab === 'createEvent') {
       fetchEvents();
+      fetchUsers();
       fetchWeeklySchedule();
     }
   }, [activeTab]);
@@ -274,6 +279,26 @@ export default function AdminDashboard() {
     const dateToUse = selectedCalendarDate || todayStr;
     setNewEventDate(dateToUse);
     setIsEventModalOpen(true);
+  };
+
+  const handleRegisterUserToEvent = async (userId: string) => {
+    if (!selectedEvent) return;
+    setAddingUserId(userId);
+    try {
+      const res = await fetch(`/api/admin/events/${selectedEvent._id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.registeredUsers) {
+        setEventDetails({ registeredUsers: data.registeredUsers });
+      }
+    } catch (err) {
+      console.error('Failed to register user', err);
+    } finally {
+      setAddingUserId(null);
+    }
   };
 
   const handleSelectEvent = async (event: any) => {
@@ -715,13 +740,21 @@ export default function AdminDashboard() {
                       </div>
 
                       <div style={{ gridColumn: '1 / -1', marginTop: '2rem' }}>
-                        <h4 className={styles.eventsSectionTitle}>Registered Users ({eventDetails?.registeredUsers?.length || 0})</h4>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                          <h4 className={styles.eventsSectionTitle}>Registered Users ({eventDetails?.registeredUsers?.length || 0})</h4>
+                          <button
+                            className={styles.btnEdit}
+                            onClick={() => setIsAddUsersToEventOpen(true)}
+                          >
+                            + Add Users
+                          </button>
+                        </div>
                         {!eventDetails ? (
                           <div className={styles.noEvents}>Loading...</div>
                         ) : eventDetails.registeredUsers.length === 0 ? (
                           <div className={styles.noEvents}>No users registered yet.</div>
                         ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {eventDetails.registeredUsers.map(user => (
                               <div key={user._id} style={{ padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between' }}>
                                 <span style={{ fontWeight: 600 }}>{user.name}</span>
@@ -736,6 +769,74 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
+
+            {/* Add Users to Event Modal */}
+            {isAddUsersToEventOpen && (
+              <div className={styles.modalOverlay}>
+                <div className={styles.modalContent}>
+                  <h3 className={styles.modalTitle}>Add Users to Event</h3>
+                  <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                    Select users to add to <strong style={{ color: '#fff' }}>{selectedEvent?.eventName}</strong>
+                  </p>
+
+                  {users.length === 0 ? (
+                    <div style={{ color: '#666', textAlign: 'center', padding: '2rem 0' }}>No users in database.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '400px', overflowY: 'auto' }}>
+                      {users.map(user => {
+                        const alreadyAdded = eventDetails?.registeredUsers?.some(u => u._id === user._id);
+                        return (
+                          <div
+                            key={user._id}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '0.9rem 1rem',
+                              background: alreadyAdded ? 'rgba(220,20,60,0.08)' : 'rgba(255,255,255,0.04)',
+                              border: `1px solid ${alreadyAdded ? 'rgba(220,20,60,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                              borderRadius: '8px',
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontWeight: 600 }}>{user.name}</div>
+                              <div style={{ fontSize: '0.8rem', color: '#888' }}>{user.contactNumber}</div>
+                            </div>
+                            {alreadyAdded ? (
+                              <span style={{ fontSize: '0.78rem', color: 'var(--crimson)', fontWeight: 600 }}>✓ Added</span>
+                            ) : (
+                              <button
+                                onClick={() => handleRegisterUserToEvent(user._id)}
+                                disabled={addingUserId === user._id}
+                                style={{
+                                  width: '32px', height: '32px',
+                                  borderRadius: '50%',
+                                  background: 'var(--crimson)',
+                                  border: 'none',
+                                  color: '#fff',
+                                  fontSize: '1.3rem',
+                                  cursor: 'pointer',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  transition: 'opacity 0.2s',
+                                  opacity: addingUserId === user._id ? 0.5 : 1,
+                                  flexShrink: 0,
+                                }}
+                              >
+                                +
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className={styles.modalActions} style={{ marginTop: '1.5rem' }}>
+                    <button className={styles.btnSecondary} onClick={() => setIsAddUsersToEventOpen(false)}>Done</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Add Event Modal */}
             {isEventModalOpen && (
