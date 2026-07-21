@@ -736,14 +736,16 @@ export default function AdminDashboard() {
                         required 
                         placeholder="e.g. Sunday Worship Service"
                       />
-                      {/* Suggestions based on selected day */}
-                      {newEventDate && (() => {
-                        const dayName = new Date(newEventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' });
+                      {/* Suggestions based on selected day - use calendar date OR typed date */}
+                      {(() => {
+                        const dateStr = newEventDate || selectedCalendarDate || '';
+                        if (!dateStr) return null;
+                        const dayName = new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' });
                         const suggestions = weeklySchedule[dayName] || [];
                         return suggestions.length > 0 ? (
                           <div>
-                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem', marginBottom: '0.3rem' }}>
-                              Suggested for {dayName}:
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.6rem', marginBottom: '0.4rem' }}>
+                              Suggestions for {dayName}:
                             </div>
                             <div className={styles.suggestionChips}>
                               {suggestions.map(s => (
@@ -764,7 +766,14 @@ export default function AdminDashboard() {
                     
                     <div style={{ display: 'flex', gap: '1rem' }}>
                       <div className={styles.formGroup} style={{ flex: 1 }}>
-                        <label>Date</label>
+                        <label>
+                          Date
+                          {newEventDate && (
+                            <span style={{ color: 'var(--crimson)', marginLeft: '0.5rem', fontWeight: 400, fontSize: '0.8rem' }}>
+                              — {new Date(newEventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' })}
+                            </span>
+                          )}
+                        </label>
                         <input 
                           type="date" 
                           value={newEventDate} 
