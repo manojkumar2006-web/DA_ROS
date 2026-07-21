@@ -210,34 +210,32 @@ export default function AdminDashboard() {
       if (rawRows.length === 0) throw new Error('The sheet appears to be empty.');
 
       // ── Smart Column Detection ───────────────────────────────────────────
-      // Strategy: scan header row (row 0) for keyword hints,
-      // then confirm by checking actual cell content in data rows.
-
       const headerRow: string[] = rawRows[0].map((h: any) => String(h).toLowerCase().trim());
       const dataRows = rawRows.slice(1).filter((r: any[]) => r.some(c => String(c).trim() !== ''));
 
-      // Keyword sets
       const nameKeywords    = ['name', 'full name', 'fullname', 'member', 'person', 'member name', 'नाम'];
-      const phoneKeywords   = ['phone', 'mobile', 'contact', 'number', 'phone number', 'mobile number',
-                               'contact number', 'cell', 'whatsapp', 'ph', 'mob', 'tel'];
+      const phoneKeywords   = ['phone', 'mobile', 'contact', 'number', 'phone number', 'mobile number', 'contact number', 'cell', 'whatsapp', 'ph', 'mob', 'tel'];
 
-      // Score each column index by keyword match
       const scoreCol = (keywords: string[], col: number) => {
         const header = headerRow[col] || '';
         return keywords.some(k => header.includes(k)) ? 10 : 0;
       };
 
-      // Also score by content: does this column mostly contain 10-digit numbers?
       const isPhoneContent = (col: number) => {
-        const values = dataRows.map(r => String(r[col] ?? '').replace(/\D/g, ''));
-        const hits = values.filter(v => v.length === 10).length;
-        return hits > values.length * 0.5; // >50% rows look like phones
+        const hits = dataRows.filter(r => {
+          const str = String(r[col] ?? '');
+          return str.replace(/\D/g, '').length >= 10;
+        }).length;
+        return hits > dataRows.length * 0.2; // >20% rows have 10+ digits
       };
 
       const isNameContent = (col: number) => {
-        const values = dataRows.map(r => String(r[col] ?? '').trim());
-        const hits = values.filter(v => v.length > 1 && /[a-zA-Z\u0900-\u097F]/.test(v)).length;
-        return hits > values.length * 0.5;
+        const hits = dataRows.filter(r => {
+          const str = String(r[col] ?? '').trim();
+          // Has letters, length > 2, and not mostly numbers
+          return str.length > 2 && /[a-zA-Z\u0900-\u097F]/.test(str) && str.replace(/\D/g, '').length < 5;
+        }).length;
+        return hits > dataRows.length * 0.4;
       };
 
       const numCols = Math.max(...rawRows.map(r => r.length));
@@ -249,7 +247,7 @@ export default function AdminDashboard() {
         if (phoneCol === -1 && scoreCol(phoneKeywords, c) > 0) phoneCol = c;
       }
 
-      // Pass 2: content-based fallback for unresolved columns
+      // Pass 2: content-based fallback
       for (let c = 0; c < numCols; c++) {
         if (phoneCol === -1 && isPhoneContent(c)) phoneCol = c;
       }
@@ -257,7 +255,7 @@ export default function AdminDashboard() {
         if (nameCol === -1 && isNameContent(c) && c !== phoneCol) nameCol = c;
       }
 
-      // Pass 3: last resort — first column = name, second = phone
+      // Pass 3: last resort
       if (nameCol  === -1) nameCol  = 0;
       if (phoneCol === -1) phoneCol = nameCol === 0 ? 1 : 0;
 
@@ -266,19 +264,24 @@ export default function AdminDashboard() {
       
       dataRows.forEach(row => {
         const name = String(row[nameCol] ?? '').trim();
-        if (!name) return; // Skip if no name exists at all
+        if (!name) return;
         
         const rawPhoneStr = String(row[phoneCol] ?? '');
-        // Strip everything except digits
-        const digitsOnly = rawPhoneStr.replace(/\D/g, '');
-        // Extract every 10-digit sequence found in the cell
-        const numbers = digitsOnly.match(/\d{10}/g) || [];
+        // Split by common separators to find multiple numbers
+        const parts = rawPhoneStr.split(/[\/,\n|&]/);
+        const numbers: string[] = [];
+
+        parts.forEach(part => {
+          const digits = part.replace(/\D/g, '');
+          if (digits.length >= 10) {
+            // Take the last 10 digits (ignores country codes like 91)
+            numbers.push(digits.slice(-10));
+          }
+        });
 
         if (numbers.length > 0) {
-          // If they have multiple numbers, join them together
           usersToImport.push({ name, contactNumber: numbers.join(' / ') });
         } else {
-          // If the number is missing completely, use "no number"
           usersToImport.push({ name, contactNumber: 'no number' });
         }
       });
