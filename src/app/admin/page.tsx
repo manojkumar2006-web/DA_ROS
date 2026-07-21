@@ -51,6 +51,10 @@ export default function AdminDashboard() {
   const [editEventGmapLink, setEditEventGmapLink] = useState('');
   const [editEventCost, setEditEventCost] = useState('');
 
+  // Attendance Tab States
+  const [attendanceSelectedEvent, setAttendanceSelectedEvent] = useState<any | null>(null);
+  const [attendanceEventDetails, setAttendanceEventDetails] = useState<{ registeredUsers: any[] } | null>(null);
+
   // Calendar State — default to today
   const todayStr = (() => {
     const t = new Date();
@@ -366,6 +370,41 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Failed to fetch event details', err);
     }
+  };
+
+  const handleSelectAttendanceEvent = async (event: any) => {
+    setAttendanceSelectedEvent(event);
+    setAttendanceEventDetails(null);
+
+    try {
+      const res = await fetch(`/api/admin/events/${event._id}`);
+      const data = await res.json();
+      if (data.registeredUsers) {
+        setAttendanceEventDetails({ registeredUsers: data.registeredUsers });
+      }
+    } catch (err) {
+      console.error('Failed to fetch attendance details', err);
+    }
+  };
+
+  const exportAttendance = () => {
+    if (!attendanceEventDetails || !attendanceEventDetails.registeredUsers) return;
+    const usersList = attendanceEventDetails.registeredUsers;
+    if (usersList.length === 0) {
+      alert("No attendance records to export.");
+      return;
+    }
+
+    const data = usersList.map((u, i) => ({
+      'S.No': i + 1,
+      'Name': u.name,
+      'Contact Number': u.contactNumber
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+    XLSX.writeFile(wb, `${attendanceSelectedEvent?.eventName || 'Event'}_Attendance.xlsx`);
   };
 
   const handleAddEventSubmit = async (e: React.FormEvent) => {
@@ -1100,7 +1139,89 @@ export default function AdminDashboard() {
         {/* ATTENDANCE SECTION */}
         {activeTab === 'attendance' && (
           <div className={styles.sectionContent} key="attendance">
-            <h1 className={styles.placeholderText}>Attendance Section</h1>
+            <div className={styles.twoColumnLayout}>
+              {/* Left Column: Event List */}
+              <div className={styles.glassCard} style={{ width: '300px', display: 'flex', flexDirection: 'column' }}>
+                <h3 className={styles.sectionTitle} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '1rem', marginBottom: '1rem' }}>
+                  Select Event
+                </h3>
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  {events.length === 0 ? (
+                    <p style={{ color: '#888', fontSize: '0.9rem' }}>No events found.</p>
+                  ) : (
+                    events.map(event => (
+                      <div 
+                        key={event._id} 
+                        className={styles.eventCard}
+                        style={{
+                          backgroundColor: attendanceSelectedEvent?._id === event._id ? 'var(--crimson-glow)' : 'transparent',
+                          borderColor: attendanceSelectedEvent?._id === event._id ? 'var(--crimson)' : 'rgba(255, 255, 255, 0.05)'
+                        }}
+                        onClick={() => handleSelectAttendanceEvent(event)}
+                      >
+                        <h4>{event.eventName}</h4>
+                        <p style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem' }}>{event.date} at {event.time}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Attendance Details */}
+              <div className={styles.mainArea}>
+                {!attendanceSelectedEvent ? (
+                  <div className={styles.glassCard} style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
+                    Select an event from the left to view attendance.
+                  </div>
+                ) : (
+                  <div className={styles.glassCard} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                      <div>
+                        <h2 style={{ margin: '0 0 0.5rem 0' }}>{attendanceSelectedEvent.eventName}</h2>
+                        <p style={{ margin: 0, color: 'var(--crimson)' }}>{attendanceSelectedEvent.date} &bull; {attendanceSelectedEvent.time}</p>
+                        {attendanceSelectedEvent.locationAddress && <p style={{ margin: '0.5rem 0 0 0', color: '#888', fontSize: '0.9rem' }}>{attendanceSelectedEvent.locationAddress}</p>}
+                      </div>
+                      
+                      <button 
+                        className={styles.btnPrimary}
+                        onClick={exportAttendance}
+                        disabled={!attendanceEventDetails?.registeredUsers?.length}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export Excel
+                      </button>
+                    </div>
+
+                    <div style={{ flex: 1, overflowY: 'auto' }}>
+                      <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>Registered Users</h3>
+                      
+                      {!attendanceEventDetails ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#888' }}>
+                           <span style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid var(--crimson)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></span>
+                           Loading attendance...
+                        </div>
+                      ) : attendanceEventDetails.registeredUsers.length === 0 ? (
+                        <p style={{ color: '#888', fontStyle: 'italic' }}>No users are registered for this event yet.</p>
+                      ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
+                          {attendanceEventDetails.registeredUsers.map((user: any) => (
+                            <div key={user._id} className={styles.userCard} style={{ cursor: 'default' }}>
+                              <h4 style={{ margin: '0 0 0.5rem 0' }}>{user.name}</h4>
+                              <p style={{ margin: 0, color: '#888', fontSize: '0.9rem' }}>{user.contactNumber}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </main>
