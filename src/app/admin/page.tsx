@@ -262,14 +262,32 @@ export default function AdminDashboard() {
       if (phoneCol === -1) phoneCol = nameCol === 0 ? 1 : 0;
 
       // ── Build Users Array ────────────────────────────────────────────────
-      const usersToImport = dataRows.map(row => {
-        const rawPhone = String(row[phoneCol] ?? '').replace(/\D/g, '').trim();
-        const name     = String(row[nameCol]  ?? '').trim();
-        return { name, contactNumber: rawPhone };
-      }).filter(u => u.name && u.contactNumber);
+      const usersToImport: any[] = [];
+      
+      dataRows.forEach(row => {
+        const name = String(row[nameCol] ?? '').trim();
+        if (!name) return; // Skip if no name exists at all
+        
+        const rawPhoneStr = String(row[phoneCol] ?? '');
+        // Strip everything except digits
+        const digitsOnly = rawPhoneStr.replace(/\D/g, '');
+        // Extract every 10-digit sequence found in the cell
+        const numbers = digitsOnly.match(/\d{10}/g) || [];
+
+        if (numbers.length > 0) {
+          // If they have multiple numbers, save each one dynamically
+          numbers.forEach(num => {
+            usersToImport.push({ name, contactNumber: num });
+          });
+        } else {
+          // If the number is missing completely, generate a smooth placeholder (e.g. 000xxxxxxx)
+          const randomSuffix = Math.floor(1000000 + Math.random() * 9000000); // 7 random digits
+          usersToImport.push({ name, contactNumber: `000${randomSuffix}` });
+        }
+      });
 
       if (usersToImport.length === 0) {
-        throw new Error('Could not detect valid name + phone data. Please check the file.');
+        throw new Error('Could not detect valid user data. Please check the file.');
       }
 
       const res = await fetch('/api/admin/users/import', {
