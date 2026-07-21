@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(todayStr);
+  const [eventViewMode, setEventViewMode] = useState<'calendar' | 'timeline'>('calendar');
 
   // Weekly Schedule State (for suggestions)
   const [weeklySchedule, setWeeklySchedule] = useState<Record<string, string[]>>({});
@@ -737,42 +738,82 @@ export default function AdminDashboard() {
               {/* Left Column: Events List */}
               <div className={styles.eventSidebar}>
                 
-                {/* CALENDAR CARD */}
-                <div className={styles.calendarCard}>
-                  <div className={styles.calendarHeader}>
-                    <button className={styles.calendarNavBtn} onClick={handlePrevMonth}>&lt;</button>
-                    <h4>{new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
-                    <button className={styles.calendarNavBtn} onClick={handleNextMonth}>&gt;</button>
-                  </div>
-                  <div className={styles.calendarGrid}>
-                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-                      <div key={day} className={styles.calendarDayName}>{day}</div>
-                    ))}
-                    {Array.from({ length: getFirstDayOfMonth(currentMonth, currentYear) }).map((_, i) => (
-                      <div key={`empty-${i}`} className={`${styles.calendarDate} ${styles.emptyDate}`}></div>
-                    ))}
-                    {Array.from({ length: getDaysInMonth(currentMonth, currentYear) }).map((_, i) => {
-                      const day = i + 1;
-                      const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                      const hasEvent = events.some(e => e.date === formattedDate);
-                      const isActive = selectedCalendarDate === formattedDate;
-                      return (
-                        <div 
-                          key={day} 
-                          className={`${styles.calendarDate} ${isActive ? styles.activeDate : ''} ${hasEvent ? styles.hasEvent : ''}`}
-                          onClick={() => handleDateClick(day)}
-                        >
-                          {day}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {selectedCalendarDate && selectedCalendarDate !== todayStr && (
-                    <button className={styles.calendarClearBtn} onClick={() => setSelectedCalendarDate(todayStr)}>
-                      Back to Today
-                    </button>
-                  )}
+                {/* VIEW TOGGLE */}
+                <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', padding: '4px', marginBottom: '1rem' }}>
+                  <button 
+                    onClick={() => setEventViewMode('calendar')}
+                    style={{ flex: 1, padding: '8px', borderRadius: '4px', border: 'none', background: eventViewMode === 'calendar' ? 'var(--crimson)' : 'transparent', color: '#fff', cursor: 'pointer', transition: 'background 0.2s' }}
+                  >
+                    Calendar
+                  </button>
+                  <button 
+                    onClick={() => setEventViewMode('timeline')}
+                    style={{ flex: 1, padding: '8px', borderRadius: '4px', border: 'none', background: eventViewMode === 'timeline' ? 'var(--crimson)' : 'transparent', color: '#fff', cursor: 'pointer', transition: 'background 0.2s' }}
+                  >
+                    Timeline
+                  </button>
                 </div>
+
+                {eventViewMode === 'calendar' ? (
+                  {/* CALENDAR CARD */}
+                  <div className={styles.calendarCard}>
+                    <div className={styles.calendarHeader}>
+                      <button className={styles.calendarNavBtn} onClick={handlePrevMonth}>&lt;</button>
+                      <h4>{new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
+                      <button className={styles.calendarNavBtn} onClick={handleNextMonth}>&gt;</button>
+                    </div>
+                    <div className={styles.calendarGrid}>
+                      {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                        <div key={day} className={styles.calendarDayName}>{day}</div>
+                      ))}
+                      {Array.from({ length: getFirstDayOfMonth(currentMonth, currentYear) }).map((_, i) => (
+                        <div key={`empty-${i}`} className={`${styles.calendarDate} ${styles.emptyDate}`}></div>
+                      ))}
+                      {Array.from({ length: getDaysInMonth(currentMonth, currentYear) }).map((_, i) => {
+                        const day = i + 1;
+                        const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        const hasEvent = events.some(e => e.date === formattedDate);
+                        const isActive = selectedCalendarDate === formattedDate;
+                        return (
+                          <div 
+                            key={day} 
+                            className={`${styles.calendarDate} ${isActive ? styles.activeDate : ''} ${hasEvent ? styles.hasEvent : ''}`}
+                            onClick={() => handleDateClick(day)}
+                          >
+                            {day}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {selectedCalendarDate && selectedCalendarDate !== todayStr && (
+                      <button className={styles.calendarClearBtn} onClick={() => setSelectedCalendarDate(todayStr)}>
+                        Back to Today
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  {/* TIMELINE VIEW */}
+                  <div className={styles.calendarCard} style={{ maxHeight: '420px', overflowY: 'auto', padding: '1rem' }}>
+                    {events.length === 0 ? (
+                      <div style={{ color: '#888', textAlign: 'center', padding: '2rem 0' }}>No upcoming events</div>
+                    ) : (
+                      [...events]
+                        .sort((a, b) => new Date(a.date + 'T' + a.time).getTime() - new Date(b.date + 'T' + b.time).getTime())
+                        .map(event => (
+                          <div key={event._id} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ minWidth: '70px', color: 'var(--crimson)', fontSize: '0.9rem' }}>
+                              <div style={{ fontWeight: 'bold' }}>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                              <div>{event.time}</div>
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 500 }}>{event.eventName}</div>
+                              {event.locationAddress && <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '4px' }}>{event.locationAddress}</div>}
+                            </div>
+                          </div>
+                      ))
+                    )}
+                  </div>
+                )}
 
                 <div className={styles.sidebarTitle}>Created Events</div>
                 {displayedEvents.length === 0 ? (
@@ -1139,54 +1180,50 @@ export default function AdminDashboard() {
         {/* ATTENDANCE SECTION */}
         {activeTab === 'attendance' && (
           <div className={styles.sectionContent} key="attendance">
-            <div className={styles.twoColumnLayout}>
+            
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Attendance Dashboard</h2>
+            </div>
+
+            <div className={styles.usersLayout}>
               {/* Left Column: Event List */}
-              <div className={styles.glassCard} style={{ width: '300px', display: 'flex', flexDirection: 'column' }}>
-                <h3 className={styles.sectionTitle} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '1rem', marginBottom: '1rem' }}>
-                  Select Event
-                </h3>
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                  {events.length === 0 ? (
-                    <p style={{ color: '#888', fontSize: '0.9rem' }}>No events found.</p>
-                  ) : (
-                    events.map(event => (
-                      <div 
-                        key={event._id} 
-                        className={styles.eventCard}
-                        style={{
-                          backgroundColor: attendanceSelectedEvent?._id === event._id ? 'var(--crimson-glow)' : 'transparent',
-                          borderColor: attendanceSelectedEvent?._id === event._id ? 'var(--crimson)' : 'rgba(255, 255, 255, 0.05)'
-                        }}
-                        onClick={() => handleSelectAttendanceEvent(event)}
-                      >
-                        <h4>{event.eventName}</h4>
-                        <p style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.25rem' }}>{event.date} at {event.time}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
+              <div className={styles.eventSidebar}>
+                <div className={styles.sidebarTitle}>Select Event</div>
+                
+                {events.length === 0 ? (
+                  <div className={styles.noUsers}>No events found.</div>
+                ) : (
+                  events.map(event => (
+                    <div 
+                      key={event._id} 
+                      className={`${styles.userListItem} ${attendanceSelectedEvent?._id === event._id ? styles.activeUser : ''}`}
+                      onClick={() => handleSelectAttendanceEvent(event)}
+                    >
+                      <span className={styles.userName}>{event.eventName}</span>
+                      <span className={styles.userPhone}>{event.date} at {event.time}</span>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Right Column: Attendance Details */}
-              <div className={styles.mainArea}>
+              <div className={styles.userDetailsArea}>
                 {!attendanceSelectedEvent ? (
-                  <div className={styles.glassCard} style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-                    Select an event from the left to view attendance.
-                  </div>
+                  <div className={styles.emptyState}>Select an event from the left to view attendance.</div>
                 ) : (
-                  <div className={styles.glassCard} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-                      <div>
-                        <h2 style={{ margin: '0 0 0.5rem 0' }}>{attendanceSelectedEvent.eventName}</h2>
-                        <p style={{ margin: 0, color: 'var(--crimson)' }}>{attendanceSelectedEvent.date} &bull; {attendanceSelectedEvent.time}</p>
-                        {attendanceSelectedEvent.locationAddress && <p style={{ margin: '0.5rem 0 0 0', color: '#888', fontSize: '0.9rem' }}>{attendanceSelectedEvent.locationAddress}</p>}
+                  <>
+                    <div className={styles.detailsHeader}>
+                      <div className={styles.detailsTitleArea}>
+                        <h3 className={styles.detailsTitle}>{attendanceSelectedEvent.eventName}</h3>
+                        <div className={styles.detailsPhone}>{attendanceSelectedEvent.date} &bull; {attendanceSelectedEvent.time}</div>
+                        {attendanceSelectedEvent.locationAddress && <div style={{color: '#888', marginTop: '0.5rem', fontSize: '0.9rem'}}>{attendanceSelectedEvent.locationAddress}</div>}
                       </div>
                       
                       <button 
-                        className={styles.btnPrimary}
+                        className={styles.btnAddUser}
                         onClick={exportAttendance}
                         disabled={!attendanceEventDetails?.registeredUsers?.length}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: !attendanceEventDetails?.registeredUsers?.length ? 0.5 : 1 }}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1197,8 +1234,8 @@ export default function AdminDashboard() {
                       </button>
                     </div>
 
-                    <div style={{ flex: 1, overflowY: 'auto' }}>
-                      <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>Registered Users</h3>
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <h4 className={styles.eventsSectionTitle}>Registered Users</h4>
                       
                       {!attendanceEventDetails ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#888' }}>
@@ -1208,17 +1245,22 @@ export default function AdminDashboard() {
                       ) : attendanceEventDetails.registeredUsers.length === 0 ? (
                         <p style={{ color: '#888', fontStyle: 'italic' }}>No users are registered for this event yet.</p>
                       ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
                           {attendanceEventDetails.registeredUsers.map((user: any) => (
-                            <div key={user._id} className={styles.userCard} style={{ cursor: 'default' }}>
-                              <h4 style={{ margin: '0 0 0.5rem 0' }}>{user.name}</h4>
+                            <div key={user._id} style={{ 
+                                background: 'rgba(255, 255, 255, 0.03)', 
+                                padding: '1rem', 
+                                borderRadius: '12px',
+                                border: '1px solid rgba(255, 255, 255, 0.05)'
+                              }}>
+                              <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--foreground)' }}>{user.name}</h4>
                               <p style={{ margin: 0, color: '#888', fontSize: '0.9rem' }}>{user.contactNumber}</p>
                             </div>
                           ))}
                         </div>
                       )}
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
