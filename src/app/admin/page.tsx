@@ -586,8 +586,8 @@ export default function AdminDashboard() {
                             referrerPolicy="no-referrer-when-downgrade"
                             src={
                               selectedEvent.gmapLink && selectedEvent.gmapLink.includes('embed') 
-                                ? selectedEvent.gmapLink.replace(/<iframe.*src="([^"]*)".*<\/iframe>/, '$1') // Extract src if they paste full iframe
-                                : `https://www.google.com/maps?q=${encodeURIComponent(selectedEvent.gmapLink || selectedEvent.locationAddress)}&output=embed`
+                                ? selectedEvent.gmapLink.replace(/<iframe.*src="([^"]*)".*<\/iframe>/, '$1')
+                                : `https://maps.google.com/maps?q=${encodeURIComponent(selectedEvent.gmapLink || selectedEvent.locationAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`
                             }
                           ></iframe>
                         </div>
