@@ -48,6 +48,11 @@ export default function AdminDashboard() {
   const [editEventGmapLink, setEditEventGmapLink] = useState('');
   const [editEventCost, setEditEventCost] = useState('');
 
+  // Calendar State
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
+
   // Fetch users when on Add User tab
   useEffect(() => {
     if (activeTab === 'addUser') {
@@ -195,6 +200,47 @@ export default function AdminDashboard() {
     }
   };
 
+  const getDaysInMonth = (month: number, year: number) => new Date(year, month + 1, 0).getDate();
+  const getFirstDayOfMonth = (month: number, year: number) => new Date(year, month, 1).getDay();
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  const handleDateClick = (day: number) => {
+    const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    if (selectedCalendarDate === formattedDate) {
+      setSelectedCalendarDate(null);
+    } else {
+      setSelectedCalendarDate(formattedDate);
+      setSelectedEvent(null);
+    }
+  };
+
+  const handleAddEventClick = () => {
+    if (selectedCalendarDate) {
+      setNewEventDate(selectedCalendarDate);
+    } else {
+      const today = new Date();
+      setNewEventDate(`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`);
+    }
+    setIsEventModalOpen(true);
+  };
+
   const handleSelectEvent = async (event: any) => {
     setSelectedEvent(event);
     setEventDetails(null);
@@ -308,7 +354,7 @@ export default function AdminDashboard() {
     } finally {
       setIsEventSubmitting(false);
     }
-  };
+  const displayedEvents = selectedCalendarDate ? events.filter(e => e.date === selectedCalendarDate) : events;
 
   return (
     <div className={styles.container}>
@@ -521,7 +567,7 @@ export default function AdminDashboard() {
           <div className={styles.sectionContent} key="createEvent">
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>Event Management</h2>
-              <button className={styles.btnAddUser} onClick={() => setIsEventModalOpen(true)}>
+              <button className={styles.btnAddUser} onClick={handleAddEventClick}>
                 + Add Event
               </button>
             </div>
@@ -529,11 +575,49 @@ export default function AdminDashboard() {
             <div className={styles.usersLayout}>
               {/* Left Column: Events List */}
               <div className={styles.usersSidebar}>
+                
+                {/* CALENDAR CARD */}
+                <div className={styles.calendarCard}>
+                  <div className={styles.calendarHeader}>
+                    <button className={styles.calendarNavBtn} onClick={handlePrevMonth}>&lt;</button>
+                    <h4>{new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
+                    <button className={styles.calendarNavBtn} onClick={handleNextMonth}>&gt;</button>
+                  </div>
+                  <div className={styles.calendarGrid}>
+                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                      <div key={day} className={styles.calendarDayName}>{day}</div>
+                    ))}
+                    {Array.from({ length: getFirstDayOfMonth(currentMonth, currentYear) }).map((_, i) => (
+                      <div key={`empty-${i}`} className={`${styles.calendarDate} ${styles.emptyDate}`}></div>
+                    ))}
+                    {Array.from({ length: getDaysInMonth(currentMonth, currentYear) }).map((_, i) => {
+                      const day = i + 1;
+                      const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                      const hasEvent = events.some(e => e.date === formattedDate);
+                      const isActive = selectedCalendarDate === formattedDate;
+                      return (
+                        <div 
+                          key={day} 
+                          className={`${styles.calendarDate} ${isActive ? styles.activeDate : ''} ${hasEvent ? styles.hasEvent : ''}`}
+                          onClick={() => handleDateClick(day)}
+                        >
+                          {day}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {selectedCalendarDate && (
+                    <button className={styles.calendarClearBtn} onClick={() => setSelectedCalendarDate(null)}>
+                      Clear Date Filter
+                    </button>
+                  )}
+                </div>
+
                 <div className={styles.sidebarTitle}>Created Events</div>
-                {events.length === 0 ? (
+                {displayedEvents.length === 0 ? (
                   <div className={styles.noUsers}>No events found.</div>
                 ) : (
-                  events.map(event => (
+                  displayedEvents.map(event => (
                     <div 
                       key={event._id} 
                       className={`${styles.userListItem} ${selectedEvent?._id === event._id ? styles.activeUser : ''}`}
