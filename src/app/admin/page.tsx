@@ -124,25 +124,27 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`/api/admin/users/${user._id}`);
       const data = await res.json();
-      if (data.registeredEvents) {
-        // Separate events into upcoming and history based on current date
-        const now = new Date();
-        const upcoming: any[] = [];
-        const history: any[] = [];
 
-        data.registeredEvents.forEach((event: any) => {
-          const eventDate = new Date(`${event.date} ${event.time}`);
-          if (eventDate >= now) {
-            upcoming.push(event);
-          } else {
-            history.push(event);
-          }
-        });
+      // Always resolve — even if no events registered yet
+      const registeredEvents: any[] = data.registeredEvents || [];
+      const now = new Date();
+      const upcoming: any[] = [];
+      const history: any[] = [];
 
-        setUserDetails({ upcoming, history });
-      }
+      registeredEvents.forEach((event: any) => {
+        // Parse date robustly: event.date is "YYYY-MM-DD", event.time is "HH:MM"
+        const eventDateTime = new Date(`${event.date}T${event.time || '00:00'}:00`);
+        if (eventDateTime >= now) {
+          upcoming.push(event);
+        } else {
+          history.push(event);
+        }
+      });
+
+      setUserDetails({ upcoming, history });
     } catch (err) {
       console.error('Failed to fetch user details', err);
+      setUserDetails({ upcoming: [], history: [] }); // still clear loading state on error
     }
   };
 
@@ -515,14 +517,18 @@ export default function AdminDashboard() {
                       <div>
                         <h4 className={styles.eventsSectionTitle}>Upcoming Events</h4>
                         {!userDetails ? (
-                          <div className={styles.noEvents}>Loading...</div>
+                          <div className={styles.noEvents} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ display: 'inline-block', width: '14px', height: '14px', border: '2px solid var(--crimson)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></span>
+                            Loading...
+                          </div>
                         ) : userDetails.upcoming.length === 0 ? (
                           <div className={styles.noEvents}>No upcoming registrations.</div>
                         ) : (
                           userDetails.upcoming.map(ev => (
                             <div key={ev._id} className={styles.eventCard}>
-                              <h4>{ev.eventName}</h4>
-                              <p>{ev.date} at {ev.time}</p>
+                              <h4 style={{ margin: '0 0 0.25rem' }}>{ev.eventName}</h4>
+                              <p style={{ margin: 0, color: 'var(--crimson)', fontSize: '0.85rem' }}>{ev.date} &bull; {ev.time}</p>
+                              {ev.locationAddress && <p style={{ margin: '0.2rem 0 0', color: '#666', fontSize: '0.78rem' }}>{ev.locationAddress}</p>}
                             </div>
                           ))
                         )}
@@ -531,14 +537,18 @@ export default function AdminDashboard() {
                       <div>
                         <h4 className={styles.eventsSectionTitle}>History</h4>
                         {!userDetails ? (
-                          <div className={styles.noEvents}>Loading...</div>
+                          <div className={styles.noEvents} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ display: 'inline-block', width: '14px', height: '14px', border: '2px solid var(--crimson)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></span>
+                            Loading...
+                          </div>
                         ) : userDetails.history.length === 0 ? (
                           <div className={styles.noEvents}>No past events attended.</div>
                         ) : (
                           userDetails.history.map(ev => (
-                            <div key={ev._id} className={styles.eventCard}>
-                              <h4>{ev.eventName}</h4>
-                              <p>{ev.date}</p>
+                            <div key={ev._id} className={styles.eventCard} style={{ opacity: 0.7 }}>
+                              <h4 style={{ margin: '0 0 0.25rem' }}>{ev.eventName}</h4>
+                              <p style={{ margin: 0, fontSize: '0.85rem', color: '#888' }}>{ev.date} &bull; {ev.time}</p>
+                              {ev.locationAddress && <p style={{ margin: '0.2rem 0 0', color: '#555', fontSize: '0.78rem' }}>{ev.locationAddress}</p>}
                             </div>
                           ))
                         )}
