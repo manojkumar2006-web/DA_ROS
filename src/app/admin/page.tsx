@@ -55,6 +55,8 @@ export default function AdminDashboard() {
   const [attendanceSelectedEvent, setAttendanceSelectedEvent] = useState<any | null>(null);
   const [attendanceEventDetails, setAttendanceEventDetails] = useState<{ registeredUsers: any[] } | null>(null);
 
+  // Profile Dropdown
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   // Calendar State — default to today
   const todayStr = (() => {
     const t = new Date();
@@ -565,7 +567,43 @@ export default function AdminDashboard() {
         </div>
 
         <div className={styles.profileArea}>
-          <div className={styles.profileCircle}>A</div>
+          <div 
+            className={styles.profileCircle} 
+            onClick={() => setIsProfileOpen(o => !o)}
+            style={{ cursor: 'pointer', userSelect: 'none', position: 'relative' }}
+          >
+            A
+          </div>
+
+          {isProfileOpen && (
+            <>
+              {/* Backdrop to close on outside click */}
+              <div 
+                style={{ position: 'fixed', inset: 0, zIndex: 99 }} 
+                onClick={() => setIsProfileOpen(false)} 
+              />
+              <div className={styles.profileDropdown}>
+                <div className={styles.profileDropdownHeader}>
+                  <div className={styles.profileDropdownAvatar}>A</div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Admin</div>
+                    <div style={{ color: '#888', fontSize: '0.8rem' }}>DA-ROS Admin Panel</div>
+                  </div>
+                </div>
+
+                <div className={styles.profileDropdownDivider} />
+
+                <a href="/" className={styles.profileDropdownItem}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  Logout
+                </a>
+              </div>
+            </>
+          )}
         </div>
       </nav>
 
