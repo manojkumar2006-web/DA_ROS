@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState<'all' | 'registered'>('all');
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -100,7 +102,13 @@ export default function UserDashboard() {
 
             {/* Section 2: Featured / Latest Event */}
             {featuredEvent && (
-              <section className={styles.featuredBox}>
+              <section
+                className={styles.featuredBox}
+                style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                onClick={() => router.push(`/home/events/${featuredEvent._id}`)}
+                onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.01)')}
+                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+              >
                 <div className={styles.featuredContent}>
                   <span className={styles.badge}>Latest Event</span>
                   <h1 className={styles.featuredTitle}>{featuredEvent.eventName}</h1>
@@ -131,7 +139,12 @@ export default function UserDashboard() {
             {remainingEvents.length > 0 && (
               <section className={styles.eventsGrid}>
                 {remainingEvents.map(event => (
-                  <div key={event._id} className={styles.eventCard}>
+                  <div
+                    key={event._id}
+                    className={styles.eventCard}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => router.push(`/home/events/${event._id}`)}
+                  >
                     <div className={styles.cardDate}>
                       {new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', {
                         month: 'long', day: 'numeric', year: 'numeric'
