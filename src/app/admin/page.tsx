@@ -617,7 +617,7 @@ export default function AdminDashboard() {
                     <div className={styles.detailsHeader}>
                       <div className={styles.detailsTitleArea}>
                         <h3 className={styles.detailsTitle}>{selectedUser.name}</h3>
-                        <div className={styles.detailsPhone}>{selectedUser.contactNumber}</div>
+                        <a href={`tel:${selectedUser.contactNumber}`} className={styles.detailsPhone} style={{ textDecoration: 'none' }}>{selectedUser.contactNumber}</a>
                       </div>
                       <button 
                         className={styles.btnDelete}

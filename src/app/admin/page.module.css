@@ -309,6 +309,12 @@
 .detailsPhone {
   color: var(--crimson);
   font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.detailsPhone:hover {
+  opacity: 0.75;
+  text-decoration: underline !important;
 }
 
 .eventsGrid {
