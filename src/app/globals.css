@@ -1,16 +1,23 @@
 :root {
-  --background: #050505;
-  --foreground: #f8f9fa;
+  --background: #0e0e12;
+  --foreground: #f0f0f5;
   --crimson: #dc143c;
   --crimson-dark: #900d28;
   --crimson-glow: rgba(220, 20, 60, 0.15);
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.08);
 }
 
 body {
   margin: 0;
   padding: 0;
   background-color: var(--background);
-  background-image: linear-gradient(rgba(5, 5, 5, 0.75), rgba(5, 5, 5, 0.90)), url('/church_bg.png');
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(220, 20, 60, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(100, 60, 180, 0.04) 0%, transparent 60%),
+    linear-gradient(rgba(14, 14, 18, 0.55), rgba(14, 14, 18, 0.80)),
+    url('/church_bg.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
