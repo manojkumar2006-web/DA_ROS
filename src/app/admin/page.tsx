@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import styles from './page.module.css';
 
@@ -57,6 +57,31 @@ export default function AdminDashboard() {
 
   // Profile Dropdown
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // 3D Parallax Background
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!bgRef.current) return;
+      const scrollY = window.scrollY;
+      bgRef.current.style.transform = `translateY(${scrollY * 0.35}px) scale(1.08)`;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!bgRef.current) return;
+      const xPercent = (e.clientX / window.innerWidth - 0.5) * 12;
+      const yPercent = (e.clientY / window.innerHeight - 0.5) * 8;
+      bgRef.current.style.transform = `translate(${xPercent}px, ${yPercent}px) scale(1.08)`;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
   // Calendar State — default to today
   const todayStr = (() => {
     const t = new Date();
@@ -555,6 +580,17 @@ export default function AdminDashboard() {
   const displayedEvents = selectedCalendarDate ? events.filter(e => e.date === selectedCalendarDate) : events;
   return (
     <div className={styles.container}>
+
+      {/* 3D Parallax Background Layer */}
+      <div className={styles.bgScene}>
+        <div ref={bgRef} className={styles.bgImage} />
+        <div className={styles.bgOverlay} />
+        {/* Floating ambient orbs */}
+        <div className={styles.orb1} />
+        <div className={styles.orb2} />
+        <div className={styles.orb3} />
+      </div>
+
       {/* Navigation Bar */}
       <nav className={styles.navbar}>
         <div className={styles.logoArea}>
