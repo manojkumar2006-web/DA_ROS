@@ -96,3 +96,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+// PATCH: Remove a single user from an event
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await dbConnect();
+    const { id: eventId } = await params;
+    const { userId } = await request.json();
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    }
+
+    await Attendance.deleteOne({ eventId, userId });
+
+    // Return updated list
+    const attendances = await Attendance.find({ eventId }).populate('userId');
+    const registeredUsers = attendances.map(att => att.userId).filter(u => u !== null);
+
+    return NextResponse.json({ registeredUsers });
+  } catch (error: any) {
+    console.error('Error removing user from event:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

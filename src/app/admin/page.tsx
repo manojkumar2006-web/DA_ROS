@@ -360,6 +360,23 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleRemoveUserFromEvent = async (userId: string) => {
+    if (!selectedEvent) return;
+    try {
+      const res = await fetch(`/api/admin/events/${selectedEvent._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.registeredUsers) {
+        setEventDetails({ registeredUsers: data.registeredUsers });
+      }
+    } catch (err) {
+      console.error('Failed to remove user', err);
+    }
+  };
+
   const handleSelectEvent = async (event: any) => {
     setSelectedEvent(event);
     setEventDetails(null);
@@ -958,9 +975,30 @@ export default function AdminDashboard() {
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {eventDetails.registeredUsers.map(user => (
-                              <div key={user._id} style={{ padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between' }}>
+                              <div key={user._id} style={{ padding: '0.85rem 1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ fontWeight: 600 }}>{user.name}</span>
-                                <span style={{ color: 'var(--crimson)' }}>{user.contactNumber}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                  <span style={{ color: 'var(--crimson)' }}>{user.contactNumber}</span>
+                                  <button
+                                    onClick={() => handleRemoveUserFromEvent(user._id)}
+                                    title="Remove from event"
+                                    style={{
+                                      background: 'rgba(220,20,60,0.1)',
+                                      border: '1px solid rgba(220,20,60,0.3)',
+                                      color: 'var(--crimson)',
+                                      borderRadius: '6px',
+                                      padding: '4px 10px',
+                                      cursor: 'pointer',
+                                      fontSize: '0.78rem',
+                                      fontWeight: 600,
+                                      transition: 'all 0.2s',
+                                    }}
+                                    onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'var(--crimson)'; (e.target as HTMLButtonElement).style.color = '#fff'; }}
+                                    onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'rgba(220,20,60,0.1)'; (e.target as HTMLButtonElement).style.color = 'var(--crimson)'; }}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
                               </div>
                             ))}
                           </div>
