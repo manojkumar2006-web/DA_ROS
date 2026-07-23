@@ -90,16 +90,16 @@
 }
 
 
-/* Navigation Bar */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 5rem;
-  background: rgba(5, 5, 5, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0 44px;
+  height: 52px;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .logoArea {
@@ -109,42 +109,45 @@
 }
 
 .logoIcon {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #fff;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(255,255,255,0.9);
   border-radius: 50%;
 }
 
 .logoText {
-  font-family: var(--font-playfair), serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #fff;
+  font-family: var(--font-apple);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f4f8fb;
+  letter-spacing: -0.02em;
 }
 
 .navTabs {
   display: flex;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 .tab {
   background: transparent;
   border: none;
-  color: #888;
-  font-size: 1rem;
-  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-apple);
+  font-size: 0.9rem;
+  font-weight: 400;
   cursor: pointer;
   padding: 0.5rem 0;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
   position: relative;
+  letter-spacing: -0.01em;
 }
 
 .tab:hover {
-  color: #fff;
+  color: #f4f8fb;
 }
 
 .activeTab {
-  color: #fff;
+  color: #f4f8fb;
 }
 
 .activeTab::after {
@@ -170,13 +173,13 @@
   top: calc(100% + 14px);
   right: 0;
   width: 220px;
-  background: rgba(15, 15, 15, 0.9);
+  background: rgba(28, 28, 30, 0.95);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
   border-radius: 14px;
   padding: 0.75rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
   z-index: 100;
   animation: fadeIn 0.15s ease forwards;
 }
@@ -228,15 +231,15 @@
 }
 
 .profileCircle {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: var(--crimson);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.2rem;
+  font-weight: 600;
+  font-size: 0.9rem;
   color: #fff;
 }
 
@@ -294,7 +297,7 @@
   color: var(--crimson);
   border: 1px solid var(--crimson);
   padding: 0.7rem 1.5rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -305,17 +308,17 @@
 }
 
 .btnAddUser {
-  background: var(--crimson);
+  background: #0071e3;
   color: #fff;
   border: none;
   padding: 0.7rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 600;
+  border-radius: 8px;
+  font-weight: 500;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 .btnAddUser:hover {
-  transform: translateY(-2px);
+  background: #0077ed;
 }
 
 .usersLayout {
@@ -327,31 +330,31 @@
 
 .usersSidebar {
   flex: 0 0 300px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  backdrop-filter: blur(16px);
   padding: 1.5rem;
   height: 600px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 /* Wider sidebar for create event tab (has calendar inside) */
 .eventSidebar {
   flex: 0 0 340px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  backdrop-filter: blur(16px);
   padding: 1.5rem;
   height: 780px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .sidebarTitle {
@@ -367,7 +370,7 @@
   background: transparent;
   border: 1px solid transparent;
   padding: 0.8rem 1rem;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #aaa;
@@ -378,8 +381,8 @@
   background: rgba(255, 255, 255, 0.05);
 }
 .userListItem.activeUser {
-  background: rgba(220, 20, 60, 0.1);
-  border-color: var(--crimson);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
   color: #fff;
 }
 .userName { font-weight: 600; }
@@ -388,14 +391,14 @@
 
 .userDetailsArea {
   flex: 1;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  backdrop-filter: blur(16px);
   padding: 2.5rem;
   min-height: 600px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .emptyState {
@@ -420,26 +423,26 @@
   flex-direction: column;
 }
 .btnDelete {
-  background: rgba(220, 20, 60, 0.1);
-  color: var(--crimson);
-  border: 1px solid var(--crimson);
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+  border: 1px solid rgba(255, 59, 48, 0.2);
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 .btnDelete:hover {
-  background: var(--crimson);
+  background: #ff3b30;
   color: #fff;
 }
 .btnEdit {
   background: transparent;
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   font-size: 0.85rem;
@@ -508,8 +511,8 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -517,11 +520,9 @@
   padding: 1rem;
 }
 .modalContent {
-  background: rgba(20, 20, 28, 0.95);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  background: #1c1c1e;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8);
   padding: 2.5rem;
   border-radius: 20px;
   width: 100%;
@@ -547,20 +548,21 @@
   display: flex; gap: 1rem; margin-top: 2rem;
 }
 .btnPrimary {
-  background: var(--crimson); color: #fff; border: none; padding: 0.8rem; border-radius: 6px; font-weight: 600; cursor: pointer; flex: 1;
+  background: #0071e3; color: #fff; border: none; padding: 0.8rem; border-radius: 8px; font-weight: 600; cursor: pointer; flex: 1;
 }
 .btnSecondary {
-  background: transparent; color: #fff; border: 1px solid #333; padding: 0.8rem; border-radius: 6px; font-weight: 600; cursor: pointer; flex: 1;
+  background: transparent; color: #fff; border: 1px solid #333; padding: 0.8rem; border-radius: 8px; font-weight: 600; cursor: pointer; flex: 1;
 }
 
 /* Calendar Styles */
 .calendarCard {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   padding: 1.25rem;
   margin-bottom: 1.25rem;
   flex-shrink: 0;
+  box-shadow: inset 0 0 3px #1d1d1f;
 }
 .calendarHeader {
   display: flex;
