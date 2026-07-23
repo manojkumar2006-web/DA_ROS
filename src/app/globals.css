@@ -1,32 +1,36 @@
 :root {
-  /* Apple Design System — extracted via SkillUI */
-  --background: #000000;           /* Apple pure black */
-  --surface: #161617;              /* Apple card surface */
-  --surface-hover: #1d1d1f;        /* Apple hover surface */
-  --border: #272729;               /* Apple border */
-  --foreground: #f4f8fb;           /* Apple text primary */
-  --text-muted: #86868b;           /* Apple text secondary */
-  --text-secondary: #e8e8ed;       /* Apple text secondary bright */
-  --accent: #0066cc;               /* Apple blue accent */
-  --accent-bright: #2997ff;        /* Apple bright blue */
-  --crimson: #dc143c;              /* DA-ROS brand keep */
+  /* ── Apple Design Tokens (SkillUI extracted) ─────── */
+  --background: #000000;
+  --surface:    #161617;
+  --surface-2:  #1c1c1e;
+  --surface-hover: #1d1d1f;
+  --border:     #272729;
+  --border-light: rgba(255,255,255,0.08);
+  --foreground: #f4f8fb;
+  --text-muted: #86868b;
+  --text-secondary: #e8e8ed;
+  --accent:     #0066cc;
+  --accent-bright: #2997ff;
+  --crimson:    #dc143c;
   --crimson-dark: #900d28;
-  --crimson-glow: rgba(220, 20, 60, 0.12);
+  --crimson-glow: rgba(220,20,60,0.15);
+
   /* Apple font stack */
-  --font-apple: -apple-system, 'SF Pro Text', 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  /* Apple spacing (4px grid) */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
-  /* Apple elevation shadows */
-  --shadow-raised: 2px 4px 12px rgba(0,0,0,0.20);
-  --shadow-floating: 8px 8px 16px rgba(0,0,0,0.08), 2px 4px 12px rgba(0,0,0,0.08);
-  --shadow-overlay: 3px 5px 30px rgba(0,0,0,0.22);
+  --font-apple: -apple-system, 'SF Pro Display', 'SF Pro Text',
+                BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+
+  /* Apple elevation */
+  --shadow-sm:      0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md:      2px 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg:      3px 5px 30px rgba(0,0,0,0.6);
+  --shadow-xl:      0 24px 64px rgba(0,0,0,0.7);
+  --shadow-crimson: 0 0 40px rgba(220,20,60,0.2);
 }
+
+/* ── Reset ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -40,20 +44,114 @@ body {
   min-height: 100vh;
 }
 
-* {
-  box-sizing: border-box;
+h1,h2,h3,h4,h5,h6 { margin: 0; }
+
+/* ── Global Scrollbar ────────────────────────────────── */
+*::-webkit-scrollbar { display: none; }
+* { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ══════════════════════════════════════════════════════
+   3D ANIMATION SYSTEM
+══════════════════════════════════════════════════════ */
+
+/* 1. Scroll Reveal — base state */
+.reveal {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+              transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
+/* 2. 3D Rotate-in from below */
+.reveal-3d {
+  opacity: 0;
+  transform: perspective(800px) rotateX(20deg) translateY(40px);
+  transform-origin: top center;
+  transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+              transform 0.9s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-3d.visible {
+  opacity: 1;
+  transform: perspective(800px) rotateX(0deg) translateY(0);
 }
 
-/* Hide scrollbars globally but keep functionality */
-*::-webkit-scrollbar {
-  display: none;
+/* 3. Scale up reveal */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+              transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
 }
 
-* {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+/* 4. Slide from left */
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+              transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 5. Slide from right */
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+              transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 6. Stagger delays */
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+.delay-5 { transition-delay: 0.5s; }
+.delay-6 { transition-delay: 0.6s; }
+
+/* ── Global keyframes ────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+@keyframes scaleIn {
+  from { opacity:0; transform:scale(0.9); }
+  to   { opacity:1; transform:scale(1); }
+}
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 20px rgba(220,20,60,0.2); }
+  50%      { box-shadow: 0 0 50px rgba(220,20,60,0.45); }
+}
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position:  1000px 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes borderGlow {
+  0%,100% { border-color: rgba(220,20,60,0.2); }
+  50%      { border-color: rgba(220,20,60,0.6); }
 }

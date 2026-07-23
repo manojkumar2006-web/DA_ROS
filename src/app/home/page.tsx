@@ -3,12 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+import { useScrollReveal, use3DTilt } from '@/hooks/useScrollReveal';
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState<'all' | 'registered'>('all');
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  useScrollReveal();
+  use3DTilt('.tilt-card');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -17,7 +21,6 @@ export default function UserDashboard() {
         const res = await fetch('/api/admin/events');
         if (res.ok) {
           const data = await res.json();
-          // Sort by date ascending (upcoming first)
           const sorted = (data.events || []).sort((a: any, b: any) =>
             new Date(a.date + 'T' + a.time).getTime() - new Date(b.date + 'T' + b.time).getTime()
           );
@@ -39,6 +42,18 @@ export default function UserDashboard() {
     });
   };
 
+  const getDayOnly = (dateStr: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr + 'T00:00:00').getDate().toString();
+  };
+
+  const getMonthOnly = (dateStr: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+      month: 'short'
+    }).toUpperCase();
+  };
+
   const featuredEvent = events[0] || null;
   const remainingEvents = events.slice(1);
 
@@ -47,7 +62,6 @@ export default function UserDashboard() {
       {/* Navigation Bar */}
       <nav className={styles.navbar}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon}></div>
           <span className={styles.logoText}>DA-ROS</span>
         </div>
 
@@ -71,115 +85,88 @@ export default function UserDashboard() {
         </div>
       </nav>
 
+      {/* Hero Section */}
+      <section className={styles.heroSection}>
+        <div className={styles.heroGlow}></div>
+        <div className={styles.heroContent}>
+          <span className={`reveal ${styles.eyebrow}`}>UPCOMING EVENTS</span>
+          <h1 className={`reveal delay-1 ${styles.heroTitle}`}>
+            {isLoading ? '...' : (events.length > 0 ? `${events.length} Events` : 'Events')}
+          </h1>
+          <p className={`reveal delay-2 ${styles.heroSubtitle}`}>Your community. Your calendar.</p>
+        </div>
+      </section>
+
       {/* Main Content */}
       <main className={styles.mainContent}>
-
         {isLoading ? (
-          /* Loading State */
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#dc143c', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-            <p style={{ color: '#888' }}>Loading events...</p>
+          <div className={styles.loadingGrid}>
+            <div className={`${styles.skeletonCard} shimmer`}></div>
+            <div className={`${styles.skeletonCard} shimmer`}></div>
+            <div className={`${styles.skeletonCard} shimmer`}></div>
           </div>
         ) : events.length === 0 ? (
-          /* Empty State */
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem' }}>📭</div>
-            <h2 style={{ color: '#fff', fontFamily: 'var(--font-playfair), serif' }}>No Events Yet</h2>
-            <p style={{ color: '#888', maxWidth: '400px' }}>The admin hasn't posted any upcoming events. Check back soon!</p>
+          <div className={`reveal ${styles.emptyState}`}>
+            <div className={styles.emptyIcon}>📭</div>
+            <h2 className={styles.emptyTitle}>No events yet</h2>
+            <p className={styles.emptyDesc}>There are no upcoming events at the moment. Please check back later.</p>
           </div>
         ) : (
           <>
-            {/* Section 1: Top Banner */}
-            <section className={styles.reminderBanner}>
-              <div className={styles.reminderText}>
-                <>
-                  <h3>🗓 {events.length} Upcoming Event{events.length !== 1 ? 's' : ''}</h3>
-                  <p>Next event: <strong>{featuredEvent?.eventName}</strong> on {formatDate(featuredEvent?.date)}</p>
-                </>
-              </div>
-              <button className={styles.reminderBtn}>View All Events ↓</button>
-            </section>
-
-            {/* Section 2: Featured / Latest Event */}
+            {/* Featured Event */}
             {featuredEvent && (
               <section
-                className={styles.featuredBox}
-                style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                className={`reveal-3d ${styles.featuredCard}`}
                 onClick={() => router.push(`/home/events/${featuredEvent._id}`)}
-                onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.01)')}
-                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
               >
-                <div className={styles.featuredContent}>
-                  <span className={styles.badge}>Latest Event</span>
-                  <h1 className={styles.featuredTitle}>{featuredEvent.eventName}</h1>
-                  <div className={styles.featuredDetails}>
-                    <span>📅 {formatDate(featuredEvent.date)}</span>
-                    <span>⏰ {featuredEvent.time}</span>
-                    <span>📍 {featuredEvent.locationAddress}</span>
-                    {featuredEvent.travelCost && (
-                      <span>🚌 Travel Cost: ₹{featuredEvent.travelCost}</span>
-                    )}
+                <div className={styles.featuredLeft}>
+                  <span className={styles.badge}>LATEST</span>
+                  <h2 className={styles.featuredTitle}>{featuredEvent.eventName}</h2>
+                  <div className={styles.featuredPills}>
+                    <span className={styles.pill}>{formatDate(featuredEvent.date)}</span>
+                    <span className={styles.pill}>{featuredEvent.time}</span>
+                    <span className={styles.pill}>{featuredEvent.locationAddress}</span>
                   </div>
-                  {featuredEvent.gmapLink && (
-                    <a
-                      href={featuredEvent.gmapLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.featuredBtn}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
-                    >
-                      View on Maps 🗺
-                    </a>
-                  )}
+                </div>
+                <div className={styles.featuredRight}>
+                  <div className={styles.dateCircle}>
+                    <span className={styles.dateMonth}>{getMonthOnly(featuredEvent.date)}</span>
+                    <span className={styles.dateDay}>{getDayOnly(featuredEvent.date)}</span>
+                  </div>
                 </div>
               </section>
             )}
 
-            {/* Section 3: Remaining Events Grid */}
+            {/* Events Grid */}
             {remainingEvents.length > 0 && (
               <section className={styles.eventsGrid}>
-                {remainingEvents.map(event => (
-                  <div
-                    key={event._id}
-                    className={styles.eventCard}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => router.push(`/home/events/${event._id}`)}
-                  >
-                    <div className={styles.cardDate}>
-                      {new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', {
-                        month: 'long', day: 'numeric', year: 'numeric'
-                      }).toUpperCase()}
+                {remainingEvents.map((event, index) => {
+                  const delayClass = `delay-${Math.min((index % 6) + 1, 6)}`;
+                  return (
+                    <div
+                      key={event._id}
+                      className={`reveal tilt-card ${delayClass} ${styles.eventCard}`}
+                      onClick={() => router.push(`/home/events/${event._id}`)}
+                    >
+                      <div className={styles.cardDate}>
+                        {formatDate(event.date)}
+                      </div>
+                      <h3 className={styles.cardTitle}>{event.eventName}</h3>
+                      <div className={styles.cardPills}>
+                        <span className={styles.pillSmall}>{event.time}</span>
+                        <span className={styles.pillSmall}>{event.locationAddress}</span>
+                      </div>
+                      <div className={styles.cardFooter}>
+                        View Details →
+                      </div>
                     </div>
-                    <h3 className={styles.cardTitle}>{event.eventName}</h3>
-                    <div className={styles.cardInfo}>
-                      <span>⏰ {event.time}</span>
-                      <span>📍 {event.locationAddress}</span>
-                      {event.travelCost && <span>🚌 ₹{event.travelCost}</span>}
-                    </div>
-                    {event.gmapLink ? (
-                      <a
-                        href={event.gmapLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.cardBtn}
-                        style={{ textDecoration: 'none', display: 'block', textAlign: 'center' }}
-                      >
-                        View on Maps
-                      </a>
-                    ) : (
-                      <button className={styles.cardBtn}>Details</button>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </section>
             )}
           </>
         )}
       </main>
-
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
     </div>
   );
 }

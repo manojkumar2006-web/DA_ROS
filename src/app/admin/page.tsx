@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 import styles from './page.module.css';
 
 export default function AdminDashboard() {
@@ -60,6 +61,9 @@ export default function AdminDashboard() {
 
   // 3D Parallax Background
   const bgRef = useRef<HTMLDivElement>(null);
+
+  // Initialize scroll reveal
+  useScrollReveal();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -667,7 +671,7 @@ export default function AdminDashboard() {
         {activeTab === 'addUser' && (
           <div className={styles.sectionContent} key="addUser">
             
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${styles.pageHeader}`}>
               <h2 className={styles.sectionTitle}>User Management</h2>
               <div>
                 <button className={styles.btnImport} onClick={() => setIsImportModalOpen(true)}>
@@ -842,7 +846,7 @@ export default function AdminDashboard() {
         {/* CREATE EVENT SECTION */}
         {activeTab === 'createEvent' && (
           <div className={styles.sectionContent} key="createEvent">
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${styles.pageHeader}`}>
               <h2 className={styles.sectionTitle}>Event Management</h2>
               <button className={styles.btnAddUser} onClick={handleAddEventClick}>
                 + Add Event
@@ -1317,7 +1321,7 @@ export default function AdminDashboard() {
         {activeTab === 'attendance' && (
           <div className={styles.sectionContent} key="attendance">
             
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${styles.pageHeader}`}>
               <h2 className={styles.sectionTitle}>Attendance Dashboard</h2>
             </div>
 
