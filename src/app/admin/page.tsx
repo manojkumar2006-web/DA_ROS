@@ -918,18 +918,35 @@ export default function AdminDashboard() {
                     ) : (
                       [...events]
                         .sort((a, b) => new Date(a.date + 'T' + a.time).getTime() - new Date(b.date + 'T' + b.time).getTime())
-                        .map(event => (
-                          <div key={event._id} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ minWidth: '70px', color: 'var(--crimson)', fontSize: '0.9rem' }}>
-                              <div style={{ fontWeight: 'bold' }}>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                              <div>{event.time}</div>
+                        .map(event => {
+                          const isSelected = selectedEvent?._id === event._id;
+                          return (
+                            <div 
+                              key={event._id}
+                              onClick={() => handleSelectEvent(event)}
+                              style={{ 
+                                display: 'flex', 
+                                gap: '1rem', 
+                                marginBottom: '0.75rem', 
+                                padding: '0.75rem 1rem', 
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                background: isSelected ? 'rgba(220, 20, 60, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                                border: isSelected ? '1px solid var(--crimson)' : '1px solid rgba(255, 255, 255, 0.05)',
+                                transition: 'all 0.2s ease',
+                              }}
+                            >
+                              <div style={{ minWidth: '70px', color: 'var(--crimson)', fontSize: '0.9rem' }}>
+                                <div style={{ fontWeight: 'bold' }}>{new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                                <div>{event.time}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 600, color: '#fff' }}>{event.eventName}</div>
+                                {event.locationAddress && <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '4px' }}>{event.locationAddress}</div>}
+                              </div>
                             </div>
-                            <div>
-                              <div style={{ fontWeight: 500 }}>{event.eventName}</div>
-                              {event.locationAddress && <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '4px' }}>{event.locationAddress}</div>}
-                            </div>
-                          </div>
-                      ))
+                          );
+                        })
                     )}
                   </div>
                 )}
