@@ -1,60 +1,63 @@
-"use client";
 import { useEffect } from 'react';
 
 export function useScrollReveal() {
   useEffect(() => {
-    const classes = ['reveal','reveal-3d','reveal-scale','reveal-left','reveal-right'];
-    const selector = classes.map(c => `.${c}`).join(',');
-    const els = document.querySelectorAll(selector);
-
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
+            entry.target.classList.add('revealed');
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.1 }
     );
 
-    els.forEach(el => observer.observe(el));
+    const elements = document.querySelectorAll('.reveal');
+    elements.forEach((el) => observer.observe(el));
+
     return () => observer.disconnect();
   }, []);
 }
 
-export function use3DTilt(selector: string) {
+export function use3DTilt(selector: string = '.tilt-card') {
   useEffect(() => {
     const cards = document.querySelectorAll<HTMLElement>(selector);
 
-    const handleMove = (e: MouseEvent, card: HTMLElement) => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const card = e.currentTarget as HTMLElement;
+      if (!card) return;
+
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const cx = rect.width / 2;
-      const cy = rect.height / 2;
-      const rotateX = ((y - cy) / cy) * -8;
-      const rotateY = ((x - cx) / cx) * 8;
-      card.style.transform =
-        `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = ((y - centerY) / centerY) * -8;
+      const rotateY = ((x - centerX) / centerX) * 8;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
     };
 
-    const handleLeave = (card: HTMLElement) => {
-      card.style.transform =
-        `perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)`;
+    const handleMouseLeave = (e: MouseEvent) => {
+      const card = e.currentTarget as HTMLElement;
+      if (!card) return;
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     };
 
-    cards.forEach(card => {
-      card.style.transition = 'transform 0.4s cubic-bezier(0.16,1,0.3,1)';
-      card.addEventListener('mousemove', (e) => handleMove(e as MouseEvent, card));
-      card.addEventListener('mouseleave', () => handleLeave(card));
+    cards.forEach((card) => {
+      card.addEventListener('mousemove', handleMouseMove);
+      card.addEventListener('mouseleave', handleMouseLeave);
+      card.style.transition = 'transform 0.15s ease-out';
     });
 
     return () => {
-      cards.forEach(card => {
-        card.removeEventListener('mousemove', () => {});
-        card.removeEventListener('mouseleave', () => {});
+      cards.forEach((card) => {
+        card.removeEventListener('mousemove', handleMouseMove);
+        card.removeEventListener('mouseleave', handleMouseLeave);
       });
     };
-  }, []);
+  }, [selector]);
 }
