@@ -1,4 +1,7 @@
+"use client";
+
 import { useState, useEffect } from 'react';
+
 import { useRouter } from 'next/navigation';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import styles from './page.module.css';
