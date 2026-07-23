@@ -162,7 +162,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 src={
                   event.gmapLink && event.gmapLink.includes('embed')
                     ? event.gmapLink
-                    : \`https://maps.google.com/maps?q=\${encodeURIComponent(event.gmapLink || event.locationAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed\`
+                    : `https://maps.google.com/maps?q=${encodeURIComponent(event.gmapLink || event.locationAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`
                 }
                 width="100%"
                 height="100%"
