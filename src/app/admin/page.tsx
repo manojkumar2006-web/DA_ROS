@@ -102,6 +102,7 @@ export default function AdminDashboard() {
   // Add Users to Event modal
   const [isAddUsersToEventOpen, setIsAddUsersToEventOpen] = useState(false);
   const [addingUserId, setAddingUserId] = useState<string | null>(null);
+  const [isAddingAll, setIsAddingAll] = useState(false);
 
   // Fetch users when on Add User tab
   useEffect(() => {
@@ -403,6 +404,37 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Failed to remove user', err);
+    }
+  };
+
+  const handleAddAllUsersToEvent = async () => {
+    if (!selectedEvent) return;
+    const unaddedUsers = users.filter(user =>
+      !eventDetails?.registeredUsers?.some((u: any) => u._id === user._id)
+    );
+    if (unaddedUsers.length === 0) return;
+
+    setIsAddingAll(true);
+    try {
+      await Promise.all(
+        unaddedUsers.map(user =>
+          fetch(`/api/admin/events/${selectedEvent._id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user._id }),
+          })
+        )
+      );
+
+      const res = await fetch(`/api/admin/events/${selectedEvent._id}`);
+      const data = await res.json();
+      if (data.registeredUsers) {
+        setEventDetails({ registeredUsers: data.registeredUsers });
+      }
+    } catch (err) {
+      console.error('Failed to add all users', err);
+    } finally {
+      setIsAddingAll(false);
     }
   };
 
@@ -1072,9 +1104,42 @@ export default function AdminDashboard() {
               <div className={styles.modalOverlay}>
                 <div className={styles.modalContent}>
                   <h3 className={styles.modalTitle}>Add Users to Event</h3>
-                  <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-                    Select users to add to <strong style={{ color: '#fff' }}>{selectedEvent?.eventName}</strong>
-                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem' }}>
+                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>
+                      Select users to add to <strong style={{ color: '#fff' }}>{selectedEvent?.eventName}</strong>
+                    </p>
+                    {users.some(user => !eventDetails?.registeredUsers?.some((u: any) => u._id === user._id)) && (
+                      <button
+                        onClick={handleAddAllUsersToEvent}
+                        disabled={isAddingAll}
+                        style={{
+                          background: 'rgba(220, 20, 60, 0.15)',
+                          border: '1px solid var(--crimson)',
+                          color: '#fff',
+                          padding: '0.4rem 0.85rem',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          cursor: isAddingAll ? 'not-allowed' : 'pointer',
+                          opacity: isAddingAll ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        {isAddingAll ? (
+                          <>
+                            <span style={{ display: 'inline-block', width: '12px', height: '12px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                            Adding All...
+                          </>
+                        ) : (
+                          '✓ Select All'
+                        )}
+                      </button>
+                    )}
+                  </div>
 
                   {users.length === 0 ? (
                     <div style={{ color: '#666', textAlign: 'center', padding: '2rem 0' }}>No users in database.</div>
