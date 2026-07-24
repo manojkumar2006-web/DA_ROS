@@ -137,7 +137,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           <div className="tilt-card" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '20px' }}>
             <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>📍</div>
             <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>Location</div>
-            <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight 700 }}>{event.locationAddress}</div>
+            <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight: 700 }}>{event.locationAddress}</div>
           </div>
 
           {event.travelCost && event.travelCost !== '0' && (
