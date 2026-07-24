@@ -72,6 +72,17 @@ export default function UserDashboard() {
     }).toUpperCase();
   };
 
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/login');
+    } catch (err) {
+      console.error('Failed to logout', err);
+    }
+  };
+
   // Determine next registered upcoming event for the reminder card
   const upcomingRegisteredEvent = registeredEvents
     .filter(e => e && e.date)
@@ -106,9 +117,65 @@ export default function UserDashboard() {
         </div>
 
         <div className={styles.profileArea}>
-          <div className={styles.profileCircle}>
+          <div 
+            className={styles.profileCircle}
+            onClick={() => setIsProfileOpen(o => !o)}
+          >
             {currentUser?.name ? currentUser.name[0].toUpperCase() : 'U'}
           </div>
+
+          {isProfileOpen && (
+            <>
+              {/* Backdrop to close on outside click */}
+              <div 
+                style={{ position: 'fixed', inset: 0, zIndex: 999 }} 
+                onClick={() => setIsProfileOpen(false)} 
+              />
+              <div className={styles.profileDropdown}>
+                <div className={styles.profileDropdownHeader}>
+                  <div className={styles.profileDropdownAvatar}>
+                    {currentUser?.name ? currentUser.name[0].toUpperCase() : 'U'}
+                  </div>
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                      {currentUser?.name || 'User'}
+                    </div>
+                    <div style={{ color: '#86868b', fontSize: '0.8rem' }}>
+                      {currentUser?.contactNumber || 'DA-ROS Member'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.profileDropdownDivider} />
+
+                <button 
+                  className={styles.profileDropdownItem}
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    setActiveTab('registered');
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  My Registered Events ({registeredEvents.length})
+                </button>
+
+                <button 
+                  className={`${styles.profileDropdownItem} ${styles.profileDropdownLogout}`}
+                  onClick={handleLogout}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </nav>
 
