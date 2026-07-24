@@ -61,7 +61,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       });
       if (res.ok) {
         setIsRegistered(true);
-        setRegisterMsg('✅ You have been registered successfully!');
+        setRegisterMsg('✅ You are registered!');
       } else {
         setRegisterMsg('❌ Registration failed. Please try again.');
       }
@@ -80,7 +80,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   if (isLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000000' }}>
-        <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#dc143c', borderRadius: '50%', animation: 'spin 1s cubic-bezier(0.16,1,0.3,1) infinite' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#dc143c', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          <p style={{ color: '#86868b', fontSize: '14px' }}>Loading event details...</p>
+        </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -89,75 +92,124 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   if (!event) return null;
 
   return (
-    <div style={{ background: '#000000', color: '#f4f8fb', fontFamily: "-apple-system, 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif", overflowX: 'hidden' }}>
-      
-      {/* Minimal Sticky Navbar */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', zIndex: 100, borderBottom: '1px solid #272729' }}>
-        <Link href="/home" style={{ position: 'absolute', left: '24px', color: '#86868b', textDecoration: 'none', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
-          <span>&larr;</span> Events
+    <div style={{ minHeight: '100vh', background: '#000000', color: '#f4f8fb', fontFamily: "-apple-system, 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif" }}>
+
+      {/* Sticky Top Navbar */}
+      <nav style={{ position: 'sticky', top: 0, height: '56px', padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.85)', backdropFilter: 'saturate(180%) blur(20px)', WebkitBackdropFilter: 'saturate(180%) blur(20px)', zIndex: 100, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <Link href="/home" style={{ color: '#86868b', textDecoration: 'none', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500, transition: 'color 0.2s' }}>
+          <span>&larr;</span> Back to Events
         </Link>
-        <div style={{ fontFamily: "-apple-system, 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif", fontWeight: 700, fontSize: '18px', color: '#f4f8fb', letterSpacing: '-0.01em' }}>
+        <span style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '-0.01em', color: '#f4f8fb' }}>
           DA-ROS
-        </div>
+        </span>
       </nav>
 
-      {/* Hero Section */}
-      <section style={{ position: 'relative', width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '60vw', height: '60vw', background: 'radial-gradient(circle, rgba(220,20,60,0.15) 0%, rgba(0,0,0,0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
-        
-        <div style={{ zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 24px' }}>
-          <div style={{ background: '#dc143c', color: '#fff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', padding: '4px 12px', borderRadius: '40px', textTransform: 'uppercase', marginBottom: '24px', animation: 'fadeIn 0.5s ease-out forwards', opacity: 0 }}>
-            EVENT
+      {/* Main Content Area */}
+      <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px 80px' }}>
+
+        {/* Event Header Banner */}
+        <div style={{ background: 'linear-gradient(135deg, rgba(220,20,60,0.12) 0%, rgba(20,20,25,0.6) 100%)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '36px 40px', marginBottom: '32px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ display: 'inline-block', background: '#dc143c', color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', padding: '4px 12px', borderRadius: '20px', textTransform: 'uppercase', marginBottom: '16px' }}>
+            EVENT DETAILS
           </div>
-          <h1 style={{ fontSize: '80px', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.05, margin: 0, maxWidth: '900px', animation: 'fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards', animationDelay: '0.2s', opacity: 0, transform: 'translateY(40px)' }}>
+          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 12px 0', lineHeight: 1.15 }}>
             {event.eventName}
           </h1>
+          <p style={{ color: '#86868b', fontSize: '16px', margin: 0 }}>
+            {formatDate(event.date)} &bull; {event.time}
+          </p>
         </div>
 
-        <div style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 1 }}>
-          <div style={{ animation: 'bounce 2s infinite', color: '#86868b', fontSize: '24px' }}>&darr;</div>
-        </div>
-      </section>
+        {/* Info Cards Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+          <div className="tilt-card" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>📅</div>
+            <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>Date</div>
+            <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight: 700 }}>{formatDate(event.date)}</div>
+          </div>
 
-      {/* Details Section */}
-      <section style={{ background: '#080808', padding: '120px 24px', position: 'relative', zIndex: 2 }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
-          
-          <div className="tilt-card reveal-left delay-1" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '16px' }}>📅</div>
-            <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '8px' }}>Date</div>
-            <div style={{ color: '#f4f8fb', fontSize: '18px', fontWeight: 700 }}>{formatDate(event.date)}</div>
+          <div className="tilt-card" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>⏰</div>
+            <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>Time</div>
+            <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight: 700 }}>{event.time}</div>
           </div>
-          
-          <div className="tilt-card reveal-left delay-2" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏰</div>
-            <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '8px' }}>Time</div>
-            <div style={{ color: '#f4f8fb', fontSize: '18px', fontWeight: 700 }}>{event.time}</div>
+
+          <div className="tilt-card" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>📍</div>
+            <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>Location</div>
+            <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight 700 }}>{event.locationAddress}</div>
           </div>
-          
-          <div className="tilt-card reveal-right delay-3" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '16px' }}>📍</div>
-            <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '8px' }}>Location</div>
-            <div style={{ color: '#f4f8fb', fontSize: '18px', fontWeight: 700 }}>{event.locationAddress}</div>
-          </div>
-          
+
           {event.travelCost && event.travelCost !== '0' && (
-            <div className="tilt-card reveal-right delay-4" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '16px' }}>🚌</div>
-              <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '8px' }}>Travel Cost</div>
-              <div style={{ color: '#f4f8fb', fontSize: '18px', fontWeight: 700 }}>₹{event.travelCost}</div>
+            <div className="tilt-card" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '20px' }}>
+              <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>🚌</div>
+              <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>Travel Cost</div>
+              <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight: 700 }}>₹{event.travelCost}</div>
             </div>
           )}
-          
         </div>
-      </section>
 
-      {/* Map Section */}
-      {event.locationAddress && (
-        <section style={{ background: '#000000', padding: '120px 24px', borderTop: '1px solid #272729' }}>
-          <div className="reveal-scale" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '56px', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', marginBottom: '40px', textAlign: 'center' }}>Getting There</h2>
-            <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid #272729', height: '380px', width: '100%', background: '#161617' }}>
+        {/* Registration CTA Card */}
+        <div style={{ background: isRegistered ? 'rgba(48,209,88,0.08)' : 'rgba(220,20,60,0.08)', border: `1px solid ${isRegistered ? 'rgba(48,209,88,0.25)' : 'rgba(220,20,60,0.25)'}`, borderRadius: '20px', padding: '32px', textAlign: 'center', marginBottom: '32px' }}>
+          {isRegistered ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎉</div>
+              <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#30d158', margin: '0 0 8px 0' }}>You're Registered!</h2>
+              <p style={{ fontSize: '15px', color: '#86868b', margin: 0 }}>Your spot is confirmed for this event. See you there!</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#fff', margin: '0 0 8px 0' }}>Reserve Your Spot</h2>
+              <p style={{ fontSize: '15px', color: '#86868b', margin: '0 0 24px 0', maxWidth: '500px' }}>
+                Join us for {event.eventName}. Register below to confirm your attendance.
+              </p>
+
+              {registerMsg && <p style={{ color: registerMsg.startsWith('✅') ? '#30d158' : '#ff453a', marginBottom: '16px', fontSize: '14px', fontWeight: 500 }}>{registerMsg}</p>}
+
+              <button
+                onClick={handleRegister}
+                disabled={isRegistering}
+                style={{
+                  background: '#dc143c',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '14px 40px',
+                  borderRadius: '980px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: isRegistering ? 'not-allowed' : 'pointer',
+                  opacity: isRegistering ? 0.8 : 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 16px rgba(220, 20, 60, 0.3)',
+                }}
+              >
+                {isRegistering ? (
+                  <>
+                    <span style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                    Registering...
+                  </>
+                ) : (
+                  'Register Now →'
+                )}
+              </button>
+
+              {!currentUser && (
+                <p style={{ color: '#86868b', fontSize: '14px', marginTop: '16px' }}>
+                  <Link href="/login" style={{ color: '#f4f8fb', textDecoration: 'underline' }}>Sign in</Link> to reserve your spot.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Venue Map */}
+        {event.locationAddress && (
+          <div>
+            <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', marginBottom: '16px' }}>Getting There</h3>
+            <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #272729', height: '320px', width: '100%', background: '#161617' }}>
               <iframe
                 src={
                   event.gmapLink && event.gmapLink.includes('embed')
@@ -173,94 +225,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               />
             </div>
           </div>
-        </section>
-      )}
+        )}
 
-      {/* Register Section */}
-      <section style={{ background: '#0a0a0a', padding: '120px 24px', borderTop: '1px solid #272729', width: '100%', position: 'relative' }}>
-        <div className="reveal-scale" style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-          {isRegistered ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ fontSize: '80px', marginBottom: '24px' }}>🎉</div>
-              <h2 style={{ fontSize: '56px', fontWeight: 700, letterSpacing: '-0.03em', color: '#30d158', margin: '0 0 16px 0' }}>You’re in!</h2>
-              <p style={{ fontSize: '20px', color: '#86868b', margin: 0, fontWeight: 500 }}>Your attendance is confirmed for this event.</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '56px', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', margin: '0 0 24px 0' }}>Join this event.</h2>
-              <p style={{ fontSize: '20px', color: '#86868b', margin: '0 0 48px 0', maxWidth: '600px', lineHeight: 1.5 }}>
-                Reserve your spot and be part of this incredible gathering. Space might be limited, so don’t wait.
-              </p>
-              
-              {registerMsg && <p style={{ color: registerMsg.startsWith('✅') ? '#30d158' : '#ff453a', marginBottom: '24px', fontSize: '16px', fontWeight: 500 }}>{registerMsg}</p>}
-              
-              <button
-                onClick={handleRegister}
-                disabled={isRegistering}
-                className="cta-button"
-                style={{
-                  background: '#dc143c',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '18px 48px',
-                  borderRadius: '980px',
-                  fontSize: '18px',
-                  fontWeight: 600,
-                  cursor: isRegistering ? 'not-allowed' : 'pointer',
-                  opacity: isRegistering ? 0.8 : 1,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px',
-                  transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
-                  boxShadow: '0 8px 24px rgba(220, 20, 60, 0.3)',
-                }}
-              >
-                {isRegistering ? (
-                  <>
-                    <span style={{ display: 'inline-block', width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                    Processing...
-                  </>
-                ) : (
-                  'Register Now'
-                )}
-              </button>
-
-              {!currentUser && (
-                <p style={{ color: '#86868b', fontSize: '15px', marginTop: '24px' }}>
-                  <Link href="/login" style={{ color: '#f4f8fb', textDecoration: 'underline' }}>Sign in</Link> to reserve your spot.
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
+      </main>
 
       <style>{`
-        @keyframes spin { 
-          to { transform: rotate(360deg); } 
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-10px); }
-          60% { transform: translateY(-5px); }
-        }
-        .cta-button:hover:not(:disabled) {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 32px rgba(220, 20, 60, 0.5) !important;
-        }
-        .cta-button:active:not(:disabled) {
-          transform: scale(0.97) translateY(0);
-          box-shadow: 0 4px 16px rgba(220, 20, 60, 0.4) !important;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
