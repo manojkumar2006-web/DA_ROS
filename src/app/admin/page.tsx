@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { formatTimeWithAmPm } from '@/lib/formatTime';
 import styles from './page.module.css';
 
 export default function AdminDashboard() {
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
     return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
   });
   const [newEventTime, setNewEventTime] = useState('');
+  const [newEventAmPm, setNewEventAmPm] = useState<'AM' | 'PM'>('AM');
   const [newEventLocation, setNewEventLocation] = useState('');
   const [newEventGmapLink, setNewEventGmapLink] = useState('');
   const [newEventCost, setNewEventCost] = useState('');
@@ -48,6 +50,7 @@ export default function AdminDashboard() {
   const [editEventName, setEditEventName] = useState('');
   const [editEventDate, setEditEventDate] = useState('');
   const [editEventTime, setEditEventTime] = useState('');
+  const [editEventAmPm, setEditEventAmPm] = useState<'AM' | 'PM'>('AM');
   const [editEventLocation, setEditEventLocation] = useState('');
   const [editEventGmapLink, setEditEventGmapLink] = useState('');
   const [editEventCost, setEditEventCost] = useState('');
@@ -518,13 +521,14 @@ export default function AdminDashboard() {
     setIsEventSubmitting(true);
 
     try {
+      const formattedTime = formatTimeWithAmPm(newEventTime, newEventAmPm);
       const res = await fetch('/api/admin/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           eventName: newEventName, 
           date: newEventDate, 
-          time: newEventTime, 
+          time: formattedTime, 
           locationAddress: newEventLocation, 
           gmapLink: newEventGmapLink,
           travelCost: newEventCost 
@@ -571,7 +575,11 @@ export default function AdminDashboard() {
     setEditEventId(event._id);
     setEditEventName(event.eventName);
     setEditEventDate(event.date);
-    setEditEventTime(event.time);
+
+    const rawTime = event.time || '';
+    setEditEventAmPm(/PM/i.test(rawTime) ? 'PM' : 'AM');
+    setEditEventTime(rawTime.replace(/\s*(AM|PM|am|pm)/i, '').trim());
+
     setEditEventLocation(event.locationAddress);
     setEditEventGmapLink(event.gmapLink || '');
     setEditEventCost(event.travelCost);
@@ -584,13 +592,14 @@ export default function AdminDashboard() {
     setIsEventSubmitting(true);
 
     try {
+      const formattedTime = formatTimeWithAmPm(editEventTime, editEventAmPm);
       const res = await fetch(`/api/admin/events/${editEventId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           eventName: editEventName, 
           date: editEventDate, 
-          time: editEventTime, 
+          time: formattedTime, 
           locationAddress: editEventLocation, 
           gmapLink: editEventGmapLink,
           travelCost: editEventCost 
@@ -968,9 +977,9 @@ export default function AdminDashboard() {
                                 transition: 'all 0.2s ease',
                               }}
                             >
-                              <div style={{ minWidth: '70px', color: 'var(--crimson)', fontSize: '0.9rem' }}>
+                              <div style={{ minWidth: '85px', color: 'var(--crimson)', fontSize: '0.9rem' }}>
                                 <div style={{ fontWeight: 'bold' }}>{new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                                <div>{event.time}</div>
+                                <div>{formatTimeWithAmPm(event.time)}</div>
                               </div>
                               <div>
                                 <div style={{ fontWeight: 600, color: '#fff' }}>{event.eventName}</div>
@@ -994,7 +1003,7 @@ export default function AdminDashboard() {
                       onClick={() => handleSelectEvent(event)}
                     >
                       <span className={styles.userName}>{event.eventName}</span>
-                      <span className={styles.userPhone}>{event.date} - {event.time}</span>
+                      <span className={styles.userPhone}>{event.date} - {formatTimeWithAmPm(event.time)}</span>
                     </div>
                   ))
                 )}
@@ -1009,7 +1018,7 @@ export default function AdminDashboard() {
                     <div className={styles.detailsHeader}>
                       <div className={styles.detailsTitleArea}>
                         <h3 className={styles.detailsTitle}>{selectedEvent.eventName}</h3>
-                        <div className={styles.detailsPhone}>{selectedEvent.date} | {selectedEvent.time}</div>
+                        <div className={styles.detailsPhone}>{selectedEvent.date} | {formatTimeWithAmPm(selectedEvent.time)}</div>
                         <div style={{color: '#888', marginTop: '0.5rem'}}>Estimated Travel Cost: ₹{selectedEvent.travelCost}</div>
                       </div>
                       <div style={{ display: 'flex' }}>
@@ -1262,14 +1271,35 @@ export default function AdminDashboard() {
                           required 
                         />
                       </div>
-                      <div className={styles.formGroup} style={{ flex: 1 }}>
-                        <label>Time</label>
-                        <input 
-                          type="time" 
-                          value={newEventTime} 
-                          onChange={e => setNewEventTime(e.target.value)} 
-                          required 
-                        />
+                      <div style={{ display: 'flex', gap: '0.5rem', flex: 1.2 }}>
+                        <div className={styles.formGroup} style={{ flex: 2 }}>
+                          <label>Time</label>
+                          <input 
+                            type="text" 
+                            value={newEventTime} 
+                            onChange={e => setNewEventTime(e.target.value)} 
+                            required 
+                            placeholder="e.g. 06:30 or 10:00"
+                          />
+                        </div>
+                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                          <label>AM / PM</label>
+                          <select 
+                            value={newEventAmPm} 
+                            onChange={e => setNewEventAmPm(e.target.value as 'AM' | 'PM')}
+                            style={{
+                              background: '#000',
+                              border: '1px solid #333',
+                              padding: '0.8rem',
+                              borderRadius: '6px',
+                              color: '#fff',
+                              fontWeight: 600,
+                            }}
+                          >
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -1345,14 +1375,35 @@ export default function AdminDashboard() {
                           required 
                         />
                       </div>
-                      <div className={styles.formGroup} style={{ flex: 1 }}>
-                        <label>Time</label>
-                        <input 
-                          type="time" 
-                          value={editEventTime} 
-                          onChange={e => setEditEventTime(e.target.value)} 
-                          required 
-                        />
+                      <div style={{ display: 'flex', gap: '0.5rem', flex: 1.2 }}>
+                        <div className={styles.formGroup} style={{ flex: 2 }}>
+                          <label>Time</label>
+                          <input 
+                            type="text" 
+                            value={editEventTime} 
+                            onChange={e => setEditEventTime(e.target.value)} 
+                            required 
+                            placeholder="e.g. 06:30 or 10:00"
+                          />
+                        </div>
+                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                          <label>AM / PM</label>
+                          <select 
+                            value={editEventAmPm} 
+                            onChange={e => setEditEventAmPm(e.target.value as 'AM' | 'PM')}
+                            style={{
+                              background: '#000',
+                              border: '1px solid #333',
+                              padding: '0.8rem',
+                              borderRadius: '6px',
+                              color: '#fff',
+                              fontWeight: 600,
+                            }}
+                          >
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -1422,7 +1473,7 @@ export default function AdminDashboard() {
                       onClick={() => handleSelectAttendanceEvent(event)}
                     >
                       <span className={styles.userName}>{event.eventName}</span>
-                      <span className={styles.userPhone}>{event.date} at {event.time}</span>
+                      <span className={styles.userPhone}>{event.date} at {formatTimeWithAmPm(event.time)}</span>
                     </div>
                   ))
                 )}
@@ -1437,7 +1488,7 @@ export default function AdminDashboard() {
                     <div className={styles.detailsHeader}>
                       <div className={styles.detailsTitleArea}>
                         <h3 className={styles.detailsTitle}>{attendanceSelectedEvent.eventName}</h3>
-                        <div className={styles.detailsPhone}>{attendanceSelectedEvent.date} &bull; {attendanceSelectedEvent.time}</div>
+                        <div className={styles.detailsPhone}>{attendanceSelectedEvent.date} &bull; {formatTimeWithAmPm(attendanceSelectedEvent.time)}</div>
                         {attendanceSelectedEvent.locationAddress && <div style={{color: '#888', marginTop: '0.5rem', fontSize: '0.9rem'}}>{attendanceSelectedEvent.locationAddress}</div>}
                       </div>
                       

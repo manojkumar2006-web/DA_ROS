@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useScrollReveal, use3DTilt } from '@/hooks/useScrollReveal';
+import { formatTimeWithAmPm } from '@/lib/formatTime';
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -116,7 +117,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
             {event.eventName}
           </h1>
           <p style={{ color: '#86868b', fontSize: '16px', margin: 0 }}>
-            {formatDate(event.date)} &bull; {event.time}
+            {formatDate(event.date)} &bull; {formatTimeWithAmPm(event.time)}
           </p>
         </div>
 
@@ -131,7 +132,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           <div className="tilt-card" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '20px' }}>
             <div style={{ fontSize: '1.6rem', marginBottom: '8px' }}>⏰</div>
             <div style={{ color: '#86868b', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>Time</div>
-            <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight: 700 }}>{event.time}</div>
+            <div style={{ color: '#f4f8fb', fontSize: '16px', fontWeight: 700 }}>{formatTimeWithAmPm(event.time)}</div>
           </div>
 
           <div className="tilt-card" style={{ background: '#161617', border: '1px solid #272729', borderRadius: '16px', padding: '20px' }}>

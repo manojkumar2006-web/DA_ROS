@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { useScrollReveal, use3DTilt } from '@/hooks/useScrollReveal';
+import { formatTimeWithAmPm } from '@/lib/formatTime';
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState<'all' | 'registered'>('all');
@@ -190,7 +191,7 @@ export default function UserDashboard() {
                   You're registered for: <strong>{upcomingRegisteredEvent.eventName}</strong>
                 </h3>
                 <p className={styles.reminderSub}>
-                  📅 {formatDate(upcomingRegisteredEvent.date)} &bull; ⏰ {upcomingRegisteredEvent.time} &bull; 📍 {upcomingRegisteredEvent.locationAddress}
+                  📅 {formatDate(upcomingRegisteredEvent.date)} &bull; ⏰ {formatTimeWithAmPm(upcomingRegisteredEvent.time)} &bull; 📍 {upcomingRegisteredEvent.locationAddress}
                 </p>
               </>
             ) : (
@@ -262,7 +263,7 @@ export default function UserDashboard() {
                   <h2 className={styles.featuredTitle}>{featuredEvent.eventName}</h2>
                   <div className={styles.featuredPills}>
                     <span className={styles.pill}>{formatDate(featuredEvent.date)}</span>
-                    <span className={styles.pill}>{featuredEvent.time}</span>
+                    <span className={styles.pill}>{formatTimeWithAmPm(featuredEvent.time)}</span>
                     <span className={styles.pill}>{featuredEvent.locationAddress}</span>
                   </div>
                 </div>
@@ -291,7 +292,7 @@ export default function UserDashboard() {
                       </div>
                       <h3 className={styles.cardTitle}>{event.eventName}</h3>
                       <div className={styles.cardPills}>
-                        <span className={styles.pillSmall}>{event.time}</span>
+                        <span className={styles.pillSmall}>{formatTimeWithAmPm(event.time)}</span>
                         <span className={styles.pillSmall}>{event.locationAddress}</span>
                       </div>
                       <div className={styles.cardFooter}>
