@@ -83,61 +83,83 @@
   cursor: pointer;
 }
 
-/* Hero Section */
-.heroSection {
-  min-height: auto;
+/* Straight Horizontal Reminder Card */
+.reminderContainer {
+  padding-top: 76px; /* offset fixed navbar */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.reminderCard {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.12) 0%, rgba(22, 22, 26, 0.8) 100%);
+  border: 1px solid rgba(220, 20, 60, 0.25);
+  border-left: 4px solid #dc143c;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  text-align: center;
-  position: relative;
-  padding: 100px 2rem 40px 2rem; /* compact offset for navbar */
+  gap: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  margin-top: 1rem;
 }
 
-.heroGlow {
-  position: absolute;
-  bottom: -10%;
-  left: 10%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(220, 20, 60, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-  z-index: 0;
-  pointer-events: none;
+.reminderCard:hover {
+  border-color: rgba(220, 20, 60, 0.5);
+  box-shadow: 0 12px 40px rgba(220, 20, 60, 0.15);
 }
 
-.heroContent {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.reminderLeft {
+  flex: 1;
 }
 
-.eyebrow {
+.reminderBadge {
+  display: inline-block;
   color: #dc143c;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 1rem;
+  margin-bottom: 0.35rem;
 }
 
-.heroTitle {
-  font-size: clamp(32px, 5vw, 56px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #f4f8fb;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.1;
-}
-
-.heroSubtitle {
+.reminderTitle {
   font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.25rem 0;
+}
+
+.reminderSub {
+  font-size: 14px;
   color: #86868b;
-  font-weight: 400;
-  letter-spacing: -0.01em;
   margin: 0;
+}
+
+.reminderBtn {
+  background: #dc143c;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 980px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.2s, background 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.reminderBtn:hover {
+  transform: translateY(-2px);
+  background: #e61943;
 }
 
 /* Main Content */
